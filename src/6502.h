@@ -29,6 +29,33 @@ enum INS
     LDY_ZP_X = 0xB4,
     LDY_ABS = 0xAC,
     LDY_ABS_X = 0xBC,
+
+    // STA
+    STA_ABS = 0x8D,
+    // more here...
+
+    // Clear/set flags
+    CLC_IM = 0x18,
+    CLD_IM = 0xD8,
+    CLI_IM = 0x58,
+    CLV_IM = 0xB8,
+    SEC_IM = 0x38,
+    SED_IM = 0xF8,
+    SEI_IM = 0x78,
+
+    // NOP
+    NOP_IM = 0xEA,
+
+    // Transfer instructions
+    TAX_IM = 0xAA,
+    TAY_IM = 0xA8,
+    TSX_IM = 0xBA,
+    TXA_IM = 0x8A,
+    TXS_IM = 0x9A,
+    TYA_IM = 0x98,
+
+    //inc/dec instructions
+    DEX_IM = 0xCA,
 };
 
 struct CPU
@@ -38,6 +65,8 @@ struct CPU
     uint8_t S; // stack pointer
 
     uint8_t cycles;
+
+    bool exception; // flag only used for unit tests
 
     // Processor status bits
     struct {
@@ -63,6 +92,7 @@ struct CPU
         S = 0xFF;
         cycles = 0;
         P = {0};
+        exception = false;
         for ( int i = 0; i < MEM_SIZE; i++ ) {
             mem[i] = 0;
         }
@@ -74,7 +104,7 @@ struct CPU
         return mem[PC++];
     };
 
-    void LDA_status_flags()
+    void A_status_flags()
     {
         if ( A == 0x0 ) {
             P.Z = 1;
@@ -84,7 +114,7 @@ struct CPU
         }
     };
 
-    void LDX_status_flags()
+    void X_status_flags()
     {
         if ( X == 0x0 ) {
             P.Z = 1;
@@ -93,7 +123,7 @@ struct CPU
             P.N = 1;
         }
     };
-    void LDY_status_flags()
+    void Y_status_flags()
     {
         if ( Y == 0x0 ) {
             P.Z = 1;
@@ -113,21 +143,21 @@ struct CPU
                     {
                         uint8_t Byte = readByte();
                         A = Byte;
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDX_IM:
                     {
                         uint8_t Byte = readByte();
                         X = Byte;
-                        LDX_status_flags();
+                        X_status_flags();
                     }
                     break;
                 case INS::LDY_IM:
                     {
                         uint8_t Byte = readByte();
                         Y = Byte;
-                        LDY_status_flags();
+                        Y_status_flags();
                     }
                     break;
                 case INS::LDA_ZP:
@@ -135,7 +165,7 @@ struct CPU
                         uint8_t Byte = readByte();
                         A = mem[Byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDX_ZP:
@@ -143,7 +173,7 @@ struct CPU
                         uint8_t Byte = readByte();
                         X = mem[Byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDX_status_flags();
+                        X_status_flags();
                     }
                     break;
                 case INS::LDY_ZP:
@@ -151,7 +181,7 @@ struct CPU
                         uint8_t Byte = readByte();
                         Y = mem[Byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDY_status_flags();
+                        Y_status_flags();
                     }
                     break;
                 case INS::LDA_ZP_X:
@@ -160,7 +190,7 @@ struct CPU
                         A = mem[Byte+X];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDX_ZP_Y:
@@ -169,7 +199,7 @@ struct CPU
                         X = mem[Byte+Y];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDX_status_flags();
+                        X_status_flags();
                     }
                     break;
                 case INS::LDY_ZP_X:
@@ -178,7 +208,7 @@ struct CPU
                         Y = mem[Byte+X];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
-                        LDY_status_flags();
+                        Y_status_flags();
                     }
                     break;
                 case INS::LDA_ABS:
@@ -187,7 +217,7 @@ struct CPU
                         uint8_t high = readByte();
                         cycles--; // one cycle to bitshift
                         A = mem[low | (high << 8)];
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDX_ABS:
@@ -196,7 +226,7 @@ struct CPU
                         uint8_t high = readByte();
                         cycles--; // one cycle to bitshift
                         X = mem[low | (high << 8)];
-                        LDX_status_flags();
+                        X_status_flags();
                     }
                     break;
                 case INS::LDY_ABS:
@@ -205,7 +235,7 @@ struct CPU
                         uint8_t high = readByte();
                         cycles--; // one cycle to bitshift
                         Y = mem[low | (high << 8)];
-                        LDY_status_flags();
+                        Y_status_flags();
                     }
                     break;
                 case INS::LDA_ABS_X:
@@ -217,7 +247,7 @@ struct CPU
                         if ( low + X > 0xFF ) {
                             cycles--;
                         }
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDX_ABS_Y:
@@ -229,7 +259,7 @@ struct CPU
                         if ( low + Y > 0xFF ) {
                             cycles--;
                         }
-                        LDX_status_flags();
+                        X_status_flags();
                     }
                     break;
                 case INS::LDY_ABS_X:
@@ -241,7 +271,7 @@ struct CPU
                         if ( low + X > 0xFF ) {
                             cycles--;
                         }
-                        LDY_status_flags();
+                        Y_status_flags();
                     }
                     break;
                 case INS::LDA_ABS_Y:
@@ -253,7 +283,7 @@ struct CPU
                         if ( low + Y > 0xFF ) {
                             cycles--;
                         }
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
                 case INS::LDA_IND_X:
@@ -272,10 +302,9 @@ struct CPU
                         // handling for ZP barrier
                         A = mem[(low | (high << 8))];
                         cycles--; // one cycle to bitshift
-                        LDA_status_flags();
+                        A_status_flags();
                     }
                     break;
-
                 case INS::LDA_IND_Y:
                     {
                         uint8_t Byte = readByte();
@@ -285,12 +314,110 @@ struct CPU
                         uint8_t high = mem[Byte+1];
                         cycles--; // read from addr
                         A = mem[( (low + Y) | (high << 8))];
-                        LDA_status_flags();
+                        A_status_flags();
+                    }
+                    break;
+                case INS::STA_ABS:
+                    {
+                        cycles--; // one cycle to get low
+                        uint8_t low = readByte();
+                        cycles--; // one cycle to get high
+                        uint8_t high = readByte();
+                        cycles--; // set memory
+                        mem[( low | (high << 8))] = A;
+                    }
+                    break;
+                case INS::CLC_IM:
+                    {
+                        cycles--;
+                        P.C = 0;
+                    }
+                    break;
+                case INS::CLD_IM:
+                    {
+                        cycles--;
+                        P.D = 0;
+                    }
+                    break;
+                case INS::CLI_IM:
+                    {
+                        cycles--;
+                        P.I = 0;
+                    }
+                    break;
+                case INS::CLV_IM:
+                    {
+                        cycles--;
+                        P.V = 0;
+                    }
+                    break;
+                case INS::SEC_IM:
+                    {
+                        cycles--;
+                        P.C = 1;
+                    }
+                    break;
+                case INS::SED_IM:
+                    {
+                        cycles--;
+                        P.D = 1;
+                    }
+                    break;
+                case INS::SEI_IM:
+                    {
+                        cycles--;
+                        P.I = 1;
+                    }
+                    break;
+                case INS::NOP_IM:
+                    {
+                        cycles--;
+                    }
+                    break;
+                case INS::TAX_IM:
+                    {
+                        cycles--;
+                        X = A;
+                        X_status_flags();
+                    }
+                    break;
+                case INS::TAY_IM:
+                    {
+                        cycles--;
+                        Y = A;
+                        Y_status_flags();
+                    }
+                    break;
+                case INS::TSX_IM:
+                    {
+                        cycles--;
+                        X = S;
+                        X_status_flags();
+                    }
+                    break;
+                case INS::TXA_IM:
+                    {
+                        cycles--;
+                        A = X;
+                        A_status_flags();
+                    }
+                    break;
+                case INS::TXS_IM:
+                    {
+                        cycles--;
+                        S = X;
+                    }
+                    break;
+                case INS::TYA_IM:
+                    {
+                        cycles--;
+                        A = Y;
+                        A_status_flags();
                     }
                     break;
                 default:
                     printf("Unhandled instruction: 0x%x\n", ins);
-                    reset();
+                    exception = true;
                     break;
             }
         }
