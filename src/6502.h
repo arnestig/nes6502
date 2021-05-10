@@ -54,8 +54,35 @@ enum INS
     TXS_IM = 0x9A,
     TYA_IM = 0x98,
 
-    //inc/dec instructions
+    //dec instructions
     DEX_IM = 0xCA,
+    DEY_IM = 0x88,
+    DEC_ZP = 0xC6,
+    DEC_ZP_X = 0xD6,
+    DEC_ABS = 0xCE,
+    DEC_ABS_X = 0xDE,
+
+    //dec instructions
+    INX_IM = 0xE8,
+    INY_IM = 0xC8,
+    INC_ZP = 0xE6,
+    INC_ZP_X = 0xF6,
+    INC_ABS = 0xEE,
+    INC_ABS_X = 0xFE,
+
+    // Jump instructions
+    JMP_ABS = 0x4C,
+    JMP_IND = 0x6C,
+    JSR_ABS = 0x20,
+    RTS_IMP = 0x60,
+
+    // Push instructions
+    PHA_IMP = 0x48,
+    PHP_IMP = 0x08,
+
+    // pull instructions
+    PLA_IMP = 0x68,
+    PLP_IMP = 0x28,
 };
 
 struct CPU
@@ -83,6 +110,20 @@ struct CPU
     uint8_t X; // X register
     uint8_t Y; // Y register
 
+    void setStatusBits( uint8_t byte ) {
+        P.C = (byte & (1 << 0)) != 0;
+        P.Z = (byte & (1 << 1)) != 0;
+        P.I = (byte & (1 << 2)) != 0;
+        P.D = (byte & (1 << 3)) != 0;
+        P.B = (byte & (1 << 4)) != 0;
+        P.V = (byte & (1 << 5)) != 0;
+        P.N = (byte & (1 << 6)) != 0;
+    };
+
+    uint8_t getStatusByte() {
+        return (P.N << 6|P.V << 5|P.B << 4|P.D << 3|P.I << 2|P.Z << 1|P.C << 0);
+    };
+
     void reset()
     {
         A = 0x0;
@@ -103,6 +144,31 @@ struct CPU
         cycles--;
         return mem[PC++];
     };
+
+    void dumpRegister()
+    {
+        for ( int i = PC-10; i <PC+10; i++) {
+            if ( i == PC ) {
+                printf("0x%.4x: 0x%.2x <<<\n",i,mem[i]);
+            } else {
+                printf("0x%.4x: 0x%.2x\n",i,mem[i]);
+            }
+
+        }
+    }
+
+    void dumpStack()
+    {
+        int rowcount = 0;
+        for ( uint16_t i = 0x01FF; i >= 0x100; i-- ) {
+            if ( (rowcount % 16) == 0 ) {
+                printf("\n0x%.4x",i);
+            }
+            rowcount++;
+            printf(" %.2x",mem[i]);
+        }
+        printf("\n");
+    }
 
     void A_status_flags()
     {
@@ -133,10 +199,20 @@ struct CPU
         }
     };
 
+    void M_status_flags( uint8_t M )
+    {
+        if ( M == 0x0 ) {
+            P.Z = 1;
+        }
+        if ( M & 0b10000000 ) {
+            P.N = 1;
+        }
+    };
+
     void execute(int8_t c)
     {
         cycles = c;
-        while ( cycles > 0 ) {
+        while ( cycles > 0 && exception == false ) {
             uint8_t ins = readByte();
             switch ( ins ) {
                 case INS::LDA_IM:
@@ -415,9 +491,200 @@ struct CPU
                         A_status_flags();
                     }
                     break;
+                case INS::DEX_IM:
+                    {
+                        cycles--;
+                        X--;
+                        X_status_flags();
+                    }
+                    break;
+                case INS::DEY_IM:
+                    {
+                        cycles--;
+                        Y--;
+                        Y_status_flags();
+                    }
+                    break;
+                case INS::INX_IM:
+                    {
+                        cycles--;
+                        X++;
+                        X_status_flags();
+                    }
+                    break;
+                case INS::INY_IM:
+                    {
+                        cycles--;
+                        Y++;
+                        Y_status_flags();
+                    }
+                    break;
+                case INS::DEC_ZP:
+                    {
+                        uint8_t Byte = readByte();
+                        cycles--; // get value from zero page
+                        cycles--; // decrease value from zero page
+                        cycles--; // set value to zero page
+                        mem[Byte]--;
+                        M_status_flags(mem[Byte]);
+                    }
+                    break;
+                case INS::DEC_ZP_X:
+                    {
+                        uint8_t Byte = readByte();
+                        cycles--; // add X to address
+                        cycles--; // get value from zero page
+                        cycles--; // decrease value from zero page
+                        cycles--; // set value to zero page
+                        mem[Byte+X]--;
+                        M_status_flags(mem[Byte+X]);
+                    }
+                    break;
+                case INS::INC_ZP:
+                    {
+                        uint8_t Byte = readByte();
+                        cycles--; // get value from zero page
+                        cycles--; // increase value from zero page
+                        cycles--; // set value to zero page
+                        mem[Byte]++;
+                        M_status_flags(mem[Byte]);
+                    }
+                    break;
+                case INS::INC_ZP_X:
+                    {
+                        uint8_t Byte = readByte();
+                        cycles--; // add X to address
+                        cycles--; // get value from zero page
+                        cycles--; // increase value from zero page
+                        cycles--; // set value to zero page
+                        mem[Byte+X]++;
+                        M_status_flags(mem[Byte+X]);
+                    }
+                    break;
+                case INS::DEC_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read value from low + high
+                        cycles--; // increment value
+                        cycles--; // set value to memory
+                        mem[( low | (high << 8))]--;
+                        M_status_flags(mem[( low | (high << 8))]);
+                    }
+                    break;
+                case INS::DEC_ABS_X:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // add X to addr
+                        cycles--; // read value from low + high
+                        cycles--; // decrease value
+                        cycles--; // set value to memory
+                        A = mem[(low | (high << 8))+X]--;
+                        M_status_flags(mem[(low | (high << 8))+X]);
+                    }
+                    break;
+                case INS::INC_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read value from low + high
+                        cycles--; // increment value
+                        cycles--; // set value to memory
+                        mem[( low | (high << 8))]++;
+                        M_status_flags(mem[(low | (high << 8))]);
+                    }
+                    break;
+                case INS::INC_ABS_X:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // add X to addr
+                        cycles--; // read value from low + high
+                        cycles--; // increase value
+                        cycles--; // set value to memory
+                        A = mem[(low | (high << 8))+X]++;
+                        M_status_flags(mem[(low | (high << 8))+X]);
+                    }
+                    break;
+                case INS::JMP_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        PC = ( low | (high << 8));
+                    }
+                    break;
+                case INS::JMP_IND:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        uint8_t low_real = mem[(low|(high << 8))];
+                        uint8_t high_real = mem[(low|(high << 8))+1];
+                        cycles--; // read byte from memory
+                        cycles--; // read byte from memory
+                        PC = ( low_real | (high_real << 8));
+                    }
+                    break;
+                case INS::JSR_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        uint16_t last_addr = PC-1;
+                        mem[0x100 + S--] = (last_addr >> 8);
+                        mem[0x100 + S--] = (last_addr & 0xFF);
+                        cycles--; // push high to stack
+                        cycles--; // push low to stack
+                        cycles--; // set PC
+                        PC = ( low | (high << 8));
+                    }
+                    break;
+                case INS::RTS_IMP:
+                    {
+                        uint8_t low = mem[0x100 + ++S];
+                        uint8_t high = mem[0x100 + ++S];
+                        cycles--; // read low from stack
+                        cycles--; // read high from stack
+                        cycles--; // inc S
+                        cycles--; // inc S
+                        cycles--; // set PC
+                        PC = ( low | (high << 8))+1;
+                    }
+                    break;
+                case INS::PHA_IMP:
+                    {
+                        cycles--; // read accumulator
+                        cycles--; // Write to stack and decrement stack
+                        mem[0x100 + S--] = A;
+                    }
+                    break;
+                case INS::PHP_IMP:
+                    {
+                        cycles--; // Read status byte
+                        cycles--; // Write to stack and decrement stack
+                        mem[0x100 + S--] = getStatusByte();
+                    }
+                    break;
+                case INS::PLA_IMP:
+                    {
+                        cycles--; // increment stack
+                        cycles--; // read from stack
+                        cycles--; // set accumulator to value
+                        A = mem[0x100 + ++S];
+                        A_status_flags();
+                    }
+                    break;
+                case INS::PLP_IMP:
+                    {
+                        cycles--; // increment stack
+                        cycles--; // read from stack
+                        cycles--; // set statusregister to value
+                        setStatusBits(mem[0x100 + ++S]);
+                    }
+                    break;
                 default:
                     printf("Unhandled instruction: 0x%x\n", ins);
                     exception = true;
+                    dumpRegister();
                     break;
             }
         }
