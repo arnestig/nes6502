@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MEM_SIZE 0xFFFF
+#define MEM_SIZE 0x10000
 
 enum INS
 {
@@ -31,8 +31,23 @@ enum INS
     LDY_ABS_X = 0xBC,
 
     // STA
+    STA_ZP = 0x85,
+    STA_ZP_X = 0x95,
     STA_ABS = 0x8D,
-    // more here...
+    STA_ABS_X = 0x9D,
+    STA_ABS_Y = 0x99,
+    STA_IND_X = 0x81,
+    STA_IND_Y = 0x91,
+
+    // STX
+    STX_ZP = 0x86,
+    STX_ZP_Y = 0x96,
+    STX_ABS = 0x8E,
+
+    // STY
+    STY_ZP = 0x84,
+    STY_ZP_X = 0x94,
+    STY_ABS = 0x8C,
 
     // Clear/set flags
     CLC_IM = 0x18,
@@ -75,6 +90,7 @@ enum INS
     JMP_IND = 0x6C,
     JSR_ABS = 0x20,
     RTS_IMP = 0x60,
+    RTI_IMP = 0x40,
 
     // Push instructions
     PHA_IMP = 0x48,
@@ -83,6 +99,47 @@ enum INS
     // pull instructions
     PLA_IMP = 0x68,
     PLP_IMP = 0x28,
+
+    // branch instructions
+    BCC_REL = 0x90,
+    BCS_REL = 0xB0,
+    BEQ_REL = 0xF0,
+    BMI_REL = 0x30,
+    BNE_REL = 0xD0,
+    BPL_REL = 0x10,
+    BVC_REL = 0x50,
+    BVS_REL = 0x70,
+
+    // BRK
+    BRK_IMP = 0x00,
+
+    // Arithmetic Shift Left
+    ASL_ACC = 0x0A,
+    ASL_ZP = 0x06,
+    ASL_ZP_X = 0x16,
+    ASL_ABS = 0x0E,
+    ASL_ABS_X = 0x1E,
+
+    // Logical Shift Right
+    LSR_ACC = 0x4A,
+    LSR_ZP = 0x46,
+    LSR_ZP_X = 0x56,
+    LSR_ABS = 0x4E,
+    LSR_ABS_X = 0x5E,
+
+    // Rotate Left
+    ROL_ACC = 0x2A,
+    ROL_ZP = 0x26,
+    ROL_ZP_X = 0x36,
+    ROL_ABS = 0x2E,
+    ROL_ABS_X = 0x3E,
+
+    // Rotate Right
+    ROR_ACC = 0x6A,
+    ROR_ZP = 0x66,
+    ROR_ZP_X = 0x76,
+    ROR_ABS = 0x6E,
+    ROR_ABS_X = 0x7E,
 };
 
 struct CPU
@@ -110,6 +167,19 @@ struct CPU
     uint8_t X; // X register
     uint8_t Y; // Y register
 
+
+    void branchInstruction( bool takeBranch )
+    {
+        uint8_t byte = readByte();
+        if ( takeBranch ) {
+            cycles--;
+            PC += byte;
+            if (( PC >> 8) != ( (PC-byte) >> 8 )) { // if to a new page
+                cycles--;
+            }
+        }
+    };
+
     void setStatusBits( uint8_t byte ) {
         P.C = (byte & (1 << 0)) != 0;
         P.Z = (byte & (1 << 1)) != 0;
@@ -126,25 +196,60 @@ struct CPU
 
     void reset()
     {
-        A = 0x0;
-        X = 0x0;
-        Y = 0x0;
-        PC = 0x1000;
-        S = 0xFF;
-        cycles = 0;
-        P = {0};
-        exception = false;
+        // reset memory
         for ( int i = 0; i < MEM_SIZE; i++ ) {
             mem[i] = 0;
         }
+
+        // registers
+        A = 0x0;
+        X = 0x0;
+        Y = 0x0;
+
+        // NMI vector
+
+        // reset vector
+        mem[0xFFFC] = 0x00;
+        mem[0xFFFD] = 0x10;
+
+        // BRK vector
+
+        // load PC from reset vector
+        PC = ( mem[0xFFFC] | (mem[0xFFFD] << 8));
+
+        // stack pointer
+        S = 0xFF;
+
+        // cycles, used for testing
+        cycles = 0;
+
+        // process status
+        P = {0};
+
+        // exception, used for testing
+        exception = false;
     };
 
+    // read one byte from mem and increment program counter
     uint8_t readByte()
     {
         cycles--;
         return mem[PC++];
     };
 
+    // dump memory at address + 20 bytes
+    void dumpMemory( uint16_t addr )
+    {
+        for ( int i = addr; i <addr+20; i++) {
+            if ( i == PC ) {
+                printf("0x%.4x: 0x%.2x <<<\n",i,mem[i]);
+            } else {
+                printf("0x%.4x: 0x%.2x\n",i,mem[i]);
+            }
+        }
+    }
+
+    // dump memory at current PC +- 10 bytes
     void dumpRegister()
     {
         for ( int i = PC-10; i <PC+10; i++) {
@@ -153,10 +258,10 @@ struct CPU
             } else {
                 printf("0x%.4x: 0x%.2x\n",i,mem[i]);
             }
-
         }
     }
 
+    // dump the stack
     void dumpStack()
     {
         int rowcount = 0;
@@ -185,7 +290,7 @@ struct CPU
         if ( X == 0x0 ) {
             P.Z = 1;
         }
-        if ( X & 0b10000000 ) {
+        if ( X & 0x80 ) {
             P.N = 1;
         }
     };
@@ -194,7 +299,7 @@ struct CPU
         if ( Y == 0x0 ) {
             P.Z = 1;
         }
-        if ( Y & 0b10000000 ) {
+        if ( Y & 0x80 ) {
             P.N = 1;
         }
     };
@@ -204,7 +309,7 @@ struct CPU
         if ( M == 0x0 ) {
             P.Z = 1;
         }
-        if ( M & 0b10000000 ) {
+        if ( M & 0x80 ) {
             P.N = 1;
         }
     };
@@ -217,53 +322,53 @@ struct CPU
             switch ( ins ) {
                 case INS::LDA_IM:
                     {
-                        uint8_t Byte = readByte();
-                        A = Byte;
+                        uint8_t byte = readByte();
+                        A = byte;
                         A_status_flags();
                     }
                     break;
                 case INS::LDX_IM:
                     {
-                        uint8_t Byte = readByte();
-                        X = Byte;
+                        uint8_t byte = readByte();
+                        X = byte;
                         X_status_flags();
                     }
                     break;
                 case INS::LDY_IM:
                     {
-                        uint8_t Byte = readByte();
-                        Y = Byte;
+                        uint8_t byte = readByte();
+                        Y = byte;
                         Y_status_flags();
                     }
                     break;
                 case INS::LDA_ZP:
                     {
-                        uint8_t Byte = readByte();
-                        A = mem[Byte];
+                        uint8_t byte = readByte();
+                        A = mem[byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         A_status_flags();
                     }
                     break;
                 case INS::LDX_ZP:
                     {
-                        uint8_t Byte = readByte();
-                        X = mem[Byte];
+                        uint8_t byte = readByte();
+                        X = mem[byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         X_status_flags();
                     }
                     break;
                 case INS::LDY_ZP:
                     {
-                        uint8_t Byte = readByte();
-                        Y = mem[Byte];
+                        uint8_t byte = readByte();
+                        Y = mem[byte];
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         Y_status_flags();
                     }
                     break;
                 case INS::LDA_ZP_X:
                     {
-                        uint8_t Byte = readByte();
-                        A = mem[Byte+X];
+                        uint8_t byte = readByte();
+                        A = mem[byte+X];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         A_status_flags();
@@ -271,8 +376,8 @@ struct CPU
                     break;
                 case INS::LDX_ZP_Y:
                     {
-                        uint8_t Byte = readByte();
-                        X = mem[Byte+Y];
+                        uint8_t byte = readByte();
+                        X = mem[byte+Y];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         X_status_flags();
@@ -280,8 +385,8 @@ struct CPU
                     break;
                 case INS::LDY_ZP_X:
                     {
-                        uint8_t Byte = readByte();
-                        Y = mem[Byte+X];
+                        uint8_t byte = readByte();
+                        Y = mem[byte+X];
                         cycles--; // takes one cycle to add X register
                         cycles--; // takes one cycle to load accumulator from ZeroPage
                         Y_status_flags();
@@ -364,16 +469,16 @@ struct CPU
                     break;
                 case INS::LDA_IND_X:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // read from address
                         // check if we need to handle ZP wrap
                         uint8_t offset = 0;
-                        if ( Byte+X+1 > 0xFF ) {
+                        if ( byte+X+1 > 0xFF ) {
                             offset = 0xFF;
                         }
-                        uint8_t low = mem[Byte+X-offset];
+                        uint8_t low = mem[byte+X-offset];
                         cycles--; // one cycle to get low
-                        uint8_t high = mem[Byte+X+1-offset];
+                        uint8_t high = mem[byte+X+1-offset];
                         cycles--; // one cycle to get high
                         // handling for ZP barrier
                         A = mem[(low | (high << 8))];
@@ -383,24 +488,130 @@ struct CPU
                     break;
                 case INS::LDA_IND_Y:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // one cycle to get low
-                        uint8_t low = mem[Byte];
+                        uint8_t low = mem[byte];
                         cycles--; // one cycle to get high
-                        uint8_t high = mem[Byte+1];
+                        uint8_t high = mem[byte + 1];
                         cycles--; // read from addr
-                        A = mem[( (low + Y) | (high << 8))];
+                        A = mem[(low | (high << 8)) + Y];
                         A_status_flags();
+                    }
+                    break;
+                case INS::STA_ZP:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // write to memory
+                        mem[byte] = A;
+                    }
+                    break;
+                case INS::STA_ZP_X:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // read X
+                        cycles--; // write to memory
+                        mem[byte + X] = A;
                     }
                     break;
                 case INS::STA_ABS:
                     {
-                        cycles--; // one cycle to get low
                         uint8_t low = readByte();
-                        cycles--; // one cycle to get high
                         uint8_t high = readByte();
                         cycles--; // set memory
                         mem[( low | (high << 8))] = A;
+                    }
+                    break;
+                case INS::STA_ABS_X:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read X
+                        cycles--; // set memory
+                        mem[( low | (high << 8)) + X] = A;
+                    }
+                    break;
+                case INS::STA_ABS_Y:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read Y
+                        cycles--; // set memory
+                        mem[( low | (high << 8)) + Y] = A;
+                    }
+                    break;
+                case INS::STA_IND_X:
+                    {
+                        uint8_t byte = readByte();
+                        // check if we need to handle ZP wrap
+                        uint8_t offset = 0;
+                        if ( byte+X+1 > 0xFF ) {
+                            offset = 0xFF;
+                        }
+                        uint8_t low = mem[byte+X-offset];
+                        uint8_t high = mem[byte+X+1-offset];
+                        cycles--; // read from address
+                        cycles--; // one cycle to get low
+                        cycles--; // one cycle to get high
+                        cycles--; // one cycle to bitshift
+                        mem[(low | (high << 8))] = A;
+                    }
+                    break;
+                case INS::STA_IND_Y:
+                    {
+                        uint8_t byte = readByte();
+                        uint8_t low = mem[byte];
+                        uint8_t high = mem[byte + 1];
+                        cycles--; // one cycle to get low
+                        cycles--; // one cycle to get high
+                        cycles--; // read from addr
+                        cycles--; // one cycle to bitshift
+                        mem[( low | (high << 8)) + Y] = A;
+                    }
+                    break;
+                case INS::STX_ZP:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // write to memory
+                        mem[byte] = X;
+                    }
+                    break;
+                case INS::STX_ZP_Y:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // read Y
+                        cycles--; // write to memory
+                        mem[byte + Y] = X;
+                    }
+                    break;
+                case INS::STX_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read X
+                        mem[( low | (high << 8))] = X;
+                    }
+                    break;
+                case INS::STY_ZP:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // write to memory
+                        mem[byte] = Y;
+                    }
+                    break;
+                case INS::STY_ZP_X:
+                    {
+                        uint8_t byte = readByte();
+                        cycles--; // read X
+                        cycles--; // write to memory
+                        mem[byte + X] = Y;
+                    }
+                    break;
+                case INS::STY_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        cycles--; // read Y
+                        mem[( low | (high << 8))] = Y;
                     }
                     break;
                 case INS::CLC_IM:
@@ -521,44 +732,44 @@ struct CPU
                     break;
                 case INS::DEC_ZP:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // get value from zero page
                         cycles--; // decrease value from zero page
                         cycles--; // set value to zero page
-                        mem[Byte]--;
-                        M_status_flags(mem[Byte]);
+                        mem[byte]--;
+                        M_status_flags(mem[byte]);
                     }
                     break;
                 case INS::DEC_ZP_X:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // add X to address
                         cycles--; // get value from zero page
                         cycles--; // decrease value from zero page
                         cycles--; // set value to zero page
-                        mem[Byte+X]--;
-                        M_status_flags(mem[Byte+X]);
+                        mem[byte+X]--;
+                        M_status_flags(mem[byte+X]);
                     }
                     break;
                 case INS::INC_ZP:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // get value from zero page
                         cycles--; // increase value from zero page
                         cycles--; // set value to zero page
-                        mem[Byte]++;
-                        M_status_flags(mem[Byte]);
+                        mem[byte]++;
+                        M_status_flags(mem[byte]);
                     }
                     break;
                 case INS::INC_ZP_X:
                     {
-                        uint8_t Byte = readByte();
+                        uint8_t byte = readByte();
                         cycles--; // add X to address
                         cycles--; // get value from zero page
                         cycles--; // increase value from zero page
                         cycles--; // set value to zero page
-                        mem[Byte+X]++;
-                        M_status_flags(mem[Byte+X]);
+                        mem[byte+X]++;
+                        M_status_flags(mem[byte+X]);
                     }
                     break;
                 case INS::DEC_ABS:
@@ -650,6 +861,19 @@ struct CPU
                         PC = ( low | (high << 8))+1;
                     }
                     break;
+                case INS::RTI_IMP:
+                    {
+                        cycles--; // stuff
+                        cycles--; // pull processor status from stack
+                        cycles--; // pull PC low from stack
+                        cycles--; // pull PC high from stack
+                        cycles--; // set PC
+                        setStatusBits(mem[0x100 + ++S]);
+                        uint8_t low = mem[0x100 + ++S];
+                        uint8_t high = mem[0x100 + ++S];
+                        PC = ( low | (high << 8));
+                    }
+                    break;
                 case INS::PHA_IMP:
                     {
                         cycles--; // read accumulator
@@ -679,6 +903,194 @@ struct CPU
                         cycles--; // read from stack
                         cycles--; // set statusregister to value
                         setStatusBits(mem[0x100 + ++S]);
+                    }
+                    break;
+                case INS::BCC_REL: // Carry Clear
+                    {
+                        branchInstruction( P.C == 0 );
+                    }
+                    break;
+                case INS::BCS_REL: // Carry Set
+                    {
+                        branchInstruction( P.C == 1 );
+                    }
+                    break;
+                case INS::BEQ_REL: // Equal
+                    {
+                        branchInstruction( P.Z == 1 );
+                    }
+                    break;
+                case INS::BMI_REL: // If minus
+                    {
+                        branchInstruction( P.N == 1 );
+                    }
+                    break;
+                case INS::BNE_REL: // Not equal
+                    {
+                        branchInstruction( P.Z == 0 );
+                    }
+                    break;
+                case INS::BPL_REL: // If positive
+                    {
+                        branchInstruction( P.N == 0 );
+                    }
+                    break;
+                case INS::BVC_REL: // Overflow clear
+                    {
+                        branchInstruction( P.V == 0 );
+                    }
+                    break;
+                case INS::BVS_REL: // Overflow set
+                    {
+                        branchInstruction( P.V == 1 );
+                    }
+                    break;
+                case INS::BRK_IMP:
+                    {
+                        mem[0x100 + S--] = (PC >> 8);
+                        mem[0x100 + S--] = (PC & 0xFF);
+                        mem[0x100 + S--] = getStatusByte();
+                        cycles--; // PCH to stack
+                        cycles--; // PCL to stack
+                        cycles--; // P to stack
+                        cycles--; // 0xFFFE to PC
+                        cycles--; // 0xFFFF to PC
+                        cycles--; // Break flag to 1
+                        PC = ( mem[0xFFFE] | (mem[0xFFFF] << 8));
+                        P.B = 1;
+                    }
+                    break;
+                case INS::ASL_ACC:
+                case INS::LSR_ACC:
+                case INS::ROL_ACC:
+                case INS::ROR_ACC:
+                    {
+                        uint8_t oldC = P.C;
+                        if ( ins == INS::ASL_ACC ) {
+                            P.C = ( A & 0x80 ) != 0;
+                            A = A << 1;
+                        } else if ( ins == INS::LSR_ACC ) {
+                            P.C = ( A & 0x1 ) != 0;
+                            A = A >> 1;
+                        } else if ( ins == INS::ROL_ACC ) {
+                            P.C = ( A & 0x80 ) != 0;
+                            A = (A << 1)|oldC;
+                        } else if ( ins == INS::ROR_ACC ) {
+                            P.C = ( A & 0x1 ) != 0;
+                            A = (A >> 1)|(oldC << 7);
+                        }
+                        cycles--; // bitshift
+                        A_status_flags();
+                    }
+                    break;
+                case INS::ASL_ZP:
+                case INS::LSR_ZP:
+                case INS::ROL_ZP:
+                case INS::ROR_ZP:
+                    {
+                        uint8_t byte = readByte();
+                        uint8_t oldC = P.C;
+                        cycles--; // get value from zero page
+                        cycles--; // bitshift left
+                        cycles--; // set value to zero page
+                        if ( ins == INS::ASL_ZP ) {
+                            P.C = ( mem[byte] & 0x80 ) != 0;
+                            mem[byte] = mem[byte] << 1;
+                        } else if ( ins == INS::LSR_ZP ) {
+                            P.C = ( mem[byte] & 0x1 ) != 0;
+                            mem[byte] = mem[byte] >> 1;
+                        } else if ( ins == INS::ROL_ZP ) {
+                            P.C = ( mem[byte] & 0x80 ) != 0;
+                            mem[byte] = (mem[byte] << 1)|oldC;
+                        } else if ( ins == INS::ROR_ZP ) {
+                            P.C = ( mem[byte] & 0x1 ) != 0;
+                            mem[byte] = (mem[byte] >> 1)|(oldC << 7);
+                        }
+                        M_status_flags(mem[byte]);
+                    }
+                    break;
+                case INS::ASL_ZP_X:
+                case INS::LSR_ZP_X:
+                case INS::ROL_ZP_X:
+                case INS::ROR_ZP_X:
+                    {
+                        uint8_t byte = readByte()+X;
+                        uint8_t oldC = P.C;
+                        cycles--; // add X to address
+                        cycles--; // get value from memory
+                        cycles--; // bitshift left
+                        cycles--; // set value to memory
+                        if ( ins == INS::ASL_ZP_X ) {
+                            P.C = ( mem[byte] & 0x80 ) != 0;
+                            mem[byte] = mem[byte] << 1;
+                        } else if ( ins == INS::LSR_ZP_X ) {
+                            P.C = ( mem[byte] & 0x1 ) != 0;
+                            mem[byte] = mem[byte] >> 1;
+                        } else if ( ins == INS::ROL_ZP_X ) {
+                            P.C = ( mem[byte] & 0x80 ) != 0;
+                            mem[byte] = (mem[byte] << 1)|oldC;
+                        } else if ( ins == INS::ROR_ZP_X ) {
+                            P.C = ( mem[byte] & 0x1 ) != 0;
+                            mem[byte] = (mem[byte] >> 1)|(oldC << 7);
+                        }
+                        M_status_flags(mem[byte]);
+                    }
+                    break;
+                case INS::ASL_ABS:
+                case INS::LSR_ABS:
+                case INS::ROL_ABS:
+                case INS::ROR_ABS:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        uint16_t addr = (low|(high << 8));
+                        uint8_t oldC = P.C;
+                        cycles--; // get value from memory
+                        cycles--; // bitshift left
+                        cycles--; // set value to memory
+                        if ( ins == INS::ASL_ABS ) {
+                            P.C = ( mem[addr] & 0x80 ) != 0;
+                            mem[addr] = mem[addr] << 1;
+                        } else if ( ins == INS::LSR_ABS ) {
+                            P.C = ( mem[addr] & 0x1 ) != 0;
+                            mem[addr] = mem[addr] >> 1;
+                        } else if ( ins == INS::ROL_ABS ) {
+                            P.C = ( mem[addr] & 0x80 ) != 0;
+                            mem[addr] = (mem[addr] << 1)|oldC;
+                        } else if ( ins == INS::ROR_ABS ) {
+                            P.C = ( mem[addr] & 0x1 ) != 0;
+                            mem[addr] = (mem[addr] >> 1)|(oldC << 7);
+                        }
+                        M_status_flags(mem[addr]);
+                    }
+                    break;
+                case INS::ASL_ABS_X:
+                case INS::LSR_ABS_X:
+                case INS::ROL_ABS_X:
+                case INS::ROR_ABS_X:
+                    {
+                        uint8_t low = readByte();
+                        uint8_t high = readByte();
+                        uint16_t addr = (low|(high << 8))+X;
+                        uint8_t oldC = P.C;
+                        cycles--; // add X to address
+                        cycles--; // get value from memory
+                        cycles--; // bitshift left
+                        cycles--; // set value to memory
+                        if ( ins == INS::ASL_ABS_X ) {
+                            P.C = ( mem[addr] & 0x80 ) != 0;
+                            mem[addr] = mem[addr] << 1;
+                        } else if ( ins == INS::LSR_ABS_X ) {
+                            P.C = ( mem[addr] & 0x1 ) != 0;
+                            mem[addr] = mem[addr] >> 1;
+                        } else if ( ins == INS::ROL_ABS_X ) {
+                            P.C = ( mem[addr] & 0x80 ) != 0;
+                            mem[addr] = (mem[addr] << 1)|oldC;
+                        } else if ( ins == INS::ROR_ABS_X ) {
+                            P.C = ( mem[addr] & 0x1 ) != 0;
+                            mem[addr] = (mem[addr] >> 1)|(oldC << 7);
+                        }
+                        M_status_flags(mem[addr]);
                     }
                     break;
                 default:
