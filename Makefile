@@ -23,18 +23,23 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 endif
 
 OBJFILES := $(patsubst src/%.cpp,obj/%.o,$(wildcard src/*.cpp))
+OBJFILES_UNIT := $(patsubst src/unittest/%.cpp,obj/unittest/%.o,$(wildcard src/unittest/*.cpp))
 
 all: $(PROGNAME)
 
-$(PROGNAME): $(OBJFILES) 
-	$(CXX) -o $(PROGNAME) $(INCLUDE_DIR) $(OBJFILES) $(LDFLAGS)
+$(PROGNAME): $(OBJFILES) $(OBJFILES_UNIT)
+	$(CXX) -o $(PROGNAME) $(INCLUDE_DIR) $(OBJFILES) $(OBJFILES_UNIT) $(LDFLAGS)
+
+obj/unittest/%.o: src/unittest/%.cpp 
+	@mkdir -p obj/unittest
+	$(CXX) -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 obj/%.o: src/%.cpp 
 	@mkdir -p obj
 	$(CXX) -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 clean:
-	rm -f $(OBJFILES) $(PROGNAME)
+	rm -f $(OBJFILES) $(OBJFILES_UNIT) $(PROGNAME)
 
 rebuild: clean all
 
