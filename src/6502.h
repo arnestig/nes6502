@@ -142,6 +142,16 @@ enum INS
     ROR_ZP_X = 0x76,
     ROR_ABS = 0x6E,
     ROR_ABS_X = 0x7E,
+
+    // Add with carry
+    ADC_IM = 0x69,
+    ADC_ZP = 0x65,
+    ADC_ZP_X = 0x75,
+    ADC_ABS = 0x6D,
+    ADC_ABS_X = 0x7D,
+    ADC_ABS_Y = 0x79,
+    ADC_IND_X = 0x61,
+    ADC_IND_Y = 0x71,
 };
 
 struct CPU
@@ -150,7 +160,7 @@ struct CPU
     uint16_t PC; // program counter
     uint8_t S; // stack pointer
 
-    uint8_t cycles;
+    int8_t cycles;
 
     bool exception; // flag only used for unit tests
 

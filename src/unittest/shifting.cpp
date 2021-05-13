@@ -11,7 +11,7 @@ TEST(CPU_6502,ASL_ACC) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ASL_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0xA);
     EXPECT_EQ(cpu.P.C,0x0);
     checkCyclesAndException();
@@ -23,7 +23,7 @@ TEST(CPU_6502,ASL_ACC_CARRY) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x92;
     cpu.mem[0x1002] = INS::ASL_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x24);
     EXPECT_EQ(cpu.P.C,0x1);
     checkCyclesAndException();
@@ -35,7 +35,7 @@ TEST(CPU_6502,ASL_ACC_NEGATIVE) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x50;
     cpu.mem[0x1002] = INS::ASL_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0xA0);
     EXPECT_EQ(cpu.P.N,0x1);
     EXPECT_EQ(cpu.P.C,0x0);
@@ -87,7 +87,7 @@ TEST(CPU_6502,ASL_ZP_X) {
     cpu.mem[0x1002] = INS::ASL_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xA;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x14);
     EXPECT_EQ(cpu.P.C,0x0);
     checkCyclesAndException();
@@ -101,7 +101,7 @@ TEST(CPU_6502,ASL_ZP_X_CARRY) {
     cpu.mem[0x1002] = INS::ASL_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0x92;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x24);
     EXPECT_EQ(cpu.P.C,0x1);
     checkCyclesAndException();
@@ -115,7 +115,7 @@ TEST(CPU_6502,ASL_ZP_X_NEGATIVE) {
     cpu.mem[0x1002] = INS::ASL_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0x50;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0xA0);
     EXPECT_EQ(cpu.P.N,0x1);
     EXPECT_EQ(cpu.P.C,0x0);
@@ -216,7 +216,7 @@ TEST(CPU_6502,LSR_ACC) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LSR_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x2);
     EXPECT_EQ(cpu.P.C,0x0);
     checkCyclesAndException();
@@ -228,7 +228,7 @@ TEST(CPU_6502,LSR_ACC_CARRY) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x9;
     cpu.mem[0x1002] = INS::LSR_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x4);
     EXPECT_EQ(cpu.P.C,0x1);
     checkCyclesAndException();
@@ -266,7 +266,7 @@ TEST(CPU_6502,LSR_ZP_X) {
     cpu.mem[0x1002] = INS::LSR_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xC;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x6);
     EXPECT_EQ(cpu.P.C,0x0);
     checkCyclesAndException();
@@ -280,7 +280,7 @@ TEST(CPU_6502,LSR_ZP_X_CARRY) {
     cpu.mem[0x1002] = INS::LSR_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xD;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x6);
     EXPECT_EQ(cpu.P.C,0x1);
     checkCyclesAndException();
@@ -348,7 +348,7 @@ TEST(CPU_6502,ROL_ACC) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0xA);
     checkCyclesAndException();
 }
@@ -360,7 +360,7 @@ TEST(CPU_6502,ROL_ACC_CARRY) {
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ACC;
     cpu.P.C = 0x1;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0xB);
     checkCyclesAndException();
 }
@@ -371,7 +371,7 @@ TEST(CPU_6502,ROL_ACC_NEGATIVE) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x40;
     cpu.mem[0x1002] = INS::ROL_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x80);
     EXPECT_EQ(cpu.P.N,0x1);
     checkCyclesAndException();
@@ -420,7 +420,7 @@ TEST(CPU_6502,ROL_ZP_X) {
     cpu.mem[0x1002] = INS::ROL_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xA;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x14);
     checkCyclesAndException();
 }
@@ -434,7 +434,7 @@ TEST(CPU_6502,ROL_ZP_X_CARRY) {
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0x20;
     cpu.P.C = 1;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x41);
     checkCyclesAndException();
 }
@@ -447,7 +447,7 @@ TEST(CPU_6502,ROL_ZP_X_NEGATIVE) {
     cpu.mem[0x1002] = INS::ROL_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0x50;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0xA0);
     EXPECT_EQ(cpu.P.N,0x1);
     checkCyclesAndException();
@@ -542,7 +542,7 @@ TEST(CPU_6502,ROR_ACC) {
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROR_ACC;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x7);
     checkCyclesAndException();
 }
@@ -554,7 +554,7 @@ TEST(CPU_6502,ROR_ACC_CARRY) {
     cpu.mem[0x1001] = 0xA;
     cpu.mem[0x1002] = INS::ROR_ACC;
     cpu.P.C = 0x1;
-    cpu.execute(3);
+    cpu.execute(4);
     EXPECT_EQ(cpu.A,0x85);
     EXPECT_EQ(cpu.P.N,0x1);
     checkCyclesAndException();
@@ -593,7 +593,7 @@ TEST(CPU_6502,ROR_ZP_X) {
     cpu.mem[0x1002] = INS::ROR_ZP_X;
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xC;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x6);
     EXPECT_EQ(cpu.P.C,0x0);
     checkCyclesAndException();
@@ -608,7 +608,7 @@ TEST(CPU_6502,ROR_ZP_X_CARRY) {
     cpu.mem[0x1003] = 0x20;
     cpu.mem[0x0025] = 0xD;
     cpu.P.C = 0x1;
-    cpu.execute(6);
+    cpu.execute(8);
     EXPECT_EQ(cpu.mem[0x25],0x86);
     EXPECT_EQ(cpu.P.N,0x1);
     checkCyclesAndException();

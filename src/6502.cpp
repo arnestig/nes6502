@@ -109,41 +109,25 @@ void CPU::dumpStack()
 
 void CPU::A_status_flags()
 {
-    if ( A == 0x0 ) {
-        P.Z = 1;
-    }
-    if ( A & 0b10000000 ) {
-        P.N = 1;
-    }
+    P.Z = ( A == 0x0 );
+    P.N = ( A & 0x80 ) != 0;
 };
 
 void CPU::X_status_flags()
 {
-    if ( X == 0x0 ) {
-        P.Z = 1;
-    }
-    if ( X & 0x80 ) {
-        P.N = 1;
-    }
+    P.Z = ( X == 0x0 );
+    P.N = ( X & 0x80 ) != 0;
 };
 void CPU::Y_status_flags()
 {
-    if ( Y == 0x0 ) {
-        P.Z = 1;
-    }
-    if ( Y & 0x80 ) {
-        P.N = 1;
-    }
+    P.Z = ( Y == 0x0 );
+    P.N = ( Y & 0x80 ) != 0;
 };
 
 void CPU::M_status_flags( uint8_t M )
 {
-    if ( M == 0x0 ) {
-        P.Z = 1;
-    }
-    if ( M & 0x80 ) {
-        P.N = 1;
-    }
+    P.Z = ( M == 0x0 );
+    P.N = ( M & 0x80 ) != 0;
 };
 
 void CPU::execute(int8_t c)
@@ -923,6 +907,99 @@ void CPU::execute(int8_t c)
                         mem[addr] = (mem[addr] >> 1)|(oldC << 7);
                     }
                     M_status_flags(mem[addr]);
+                }
+                break;
+            case INS::ADC_IM:
+                {
+                    uint8_t byte = readByte();
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+byte+P.C) & 0x100) != 0;
+                    A += byte + oldCarry;
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_ZP:
+                {
+                    uint8_t byte = readByte();
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
+                    A += mem[byte] + oldCarry;
+                    cycles--; // read from memory
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_ZP_X:
+                {
+                    uint8_t byte = readByte()+X;
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
+                    A += mem[byte] + oldCarry;
+                    cycles--; // read from memory
+                    cycles--; // read from X
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_ABS:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8);
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                    A += mem[addr] + oldCarry;
+                    cycles--; // read from memory
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_ABS_X:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8)+X;
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                    A += mem[addr] + oldCarry;
+                    cycles--; // read from memory
+                    if ( (addr >> 8) != ((addr-X) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_ABS_Y:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8)+Y;
+                    uint8_t oldCarry = P.C;
+                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                    A += mem[addr] + oldCarry;
+                    cycles--; // read from memory
+                    if ( (addr >> 8) != ((addr-Y) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_IND_X:
+                {
+                    // Use this IND X for all others!
+                    uint8_t byte = readByte()+X;
+                    uint8_t low = mem[byte];
+                    uint8_t high = mem[uint8_t(byte+1)];
+                    uint16_t addr = (low|high << 8);
+                    uint8_t oldCarry = P.C;
+                    cycles--; // one cycle to get low
+                    cycles--; // one cycle to get high
+                    cycles--; // one cycle to bitshift
+                    cycles--; // read from memory
+                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                    A += mem[addr] + oldCarry;
+                    A_status_flags();
+                }
+                break;
+            case INS::ADC_IND_Y:
+                {
                 }
                 break;
             default:
