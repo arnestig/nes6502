@@ -911,6 +911,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_IM:
             case INS::SBC_IM:
+            case INS::AND_IM:
+            case INS::ORA_IM:
+            case INS::EOR_IM:
                 {
                     uint8_t byte = readByte();
                     uint8_t oldCarry = P.C;
@@ -920,7 +923,13 @@ void CPU::execute(int8_t c)
                         newA = A + byte + oldCarry;
                     } else if ( ins == INS::SBC_IM ) {
                         newA = A - byte - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_IM ) {
+                        newA = A & byte;
+                    } else if ( ins == INS::ORA_IM ) {
+                        newA = A | byte;
+                    } else if ( ins == INS::EOR_IM ) {
+                        newA = A ^ byte;
                     }
                     A = newA;
                     A_status_flags();
@@ -928,16 +937,25 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_ZP:
             case INS::SBC_ZP:
+            case INS::AND_ZP:
+            case INS::ORA_ZP:
+            case INS::EOR_ZP:
                 {
-                    uint8_t byte = readByte();
+                    uint8_t addr = readByte();
                     uint8_t oldCarry = P.C;
                     uint8_t newA = 0x0;
                     if ( ins == INS::ADC_ZP ) {
-                        P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
-                        newA = A + mem[byte] + oldCarry;
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_ZP ) {
-                        newA = A - mem[byte] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_ZP ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_ZP ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_ZP ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     cycles--; // read from memory
@@ -946,16 +964,25 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_ZP_X:
             case INS::SBC_ZP_X:
+            case INS::AND_ZP_X:
+            case INS::ORA_ZP_X:
+            case INS::EOR_ZP_X:
                 {
-                    uint8_t byte = readByte()+X;
+                    uint8_t addr = readByte()+X;
                     uint8_t oldCarry = P.C;
                     uint8_t newA = 0x0;
                     if ( ins == INS::ADC_ZP_X ) {
-                        P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
-                        newA = A + mem[byte] + oldCarry;
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_ZP_X ) {
-                        newA = A - mem[byte] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_ZP_X ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_ZP_X ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_ZP_X ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     cycles--; // read from memory
@@ -965,6 +992,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_ABS:
             case INS::SBC_ABS:
+            case INS::AND_ABS:
+            case INS::ORA_ABS:
+            case INS::EOR_ABS:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
@@ -976,7 +1006,13 @@ void CPU::execute(int8_t c)
                         newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_ABS ) {
                         newA = A - mem[addr] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_ABS ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_ABS ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_ABS ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     cycles--; // read from memory
@@ -985,6 +1021,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_ABS_X:
             case INS::SBC_ABS_X:
+            case INS::AND_ABS_X:
+            case INS::ORA_ABS_X:
+            case INS::EOR_ABS_X:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
@@ -996,7 +1035,13 @@ void CPU::execute(int8_t c)
                         newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_ABS_X ) {
                         newA = A - mem[addr] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_ABS_X ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_ABS_X ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_ABS_X ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     cycles--; // read from memory
@@ -1008,6 +1053,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_ABS_Y:
             case INS::SBC_ABS_Y:
+            case INS::AND_ABS_Y:
+            case INS::ORA_ABS_Y:
+            case INS::EOR_ABS_Y:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
@@ -1019,7 +1067,13 @@ void CPU::execute(int8_t c)
                         newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_ABS_Y ) {
                         newA = A - mem[addr] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_ABS_Y ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_ABS_Y ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_ABS_Y ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     cycles--; // read from memory
@@ -1031,6 +1085,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_IND_X:
             case INS::SBC_IND_X:
+            case INS::AND_IND_X:
+            case INS::ORA_IND_X:
+            case INS::EOR_IND_X:
                 {
                     // Use this IND X for all others!
                     uint8_t byte = readByte()+X;
@@ -1048,7 +1105,13 @@ void CPU::execute(int8_t c)
                         newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_IND_X ) {
                         newA = A - mem[addr] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_IND_X ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_IND_X ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_IND_X ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     A_status_flags();
@@ -1056,6 +1119,9 @@ void CPU::execute(int8_t c)
                 break;
             case INS::ADC_IND_Y:
             case INS::SBC_IND_Y:
+            case INS::AND_IND_Y:
+            case INS::ORA_IND_Y:
+            case INS::EOR_IND_Y:
                 {
                     uint8_t byte = readByte();
                     uint8_t low = mem[byte];
@@ -1074,10 +1140,176 @@ void CPU::execute(int8_t c)
                         newA = A + mem[addr] + oldCarry;
                     } else if ( ins == INS::SBC_IND_Y ) {
                         newA = A - mem[addr] - (1-oldCarry);
-                        P.C = (A < newA) ? 0 : 1;
+                        P.C = (A >= newA);
+                    } else if ( ins == INS::AND_IND_Y ) {
+                        newA = A & mem[addr];
+                    } else if ( ins == INS::ORA_IND_Y ) {
+                        newA = A | mem[addr];
+                    } else if ( ins == INS::EOR_IND_Y ) {
+                        newA = A ^ mem[addr];
                     }
                     A = newA;
                     A_status_flags();
+                }
+                break;
+
+            case INS::CMP_IM:
+                {
+                    uint8_t byte = readByte();
+                    P.C = (A >= byte) ? 1 : 0;
+                    P.Z = (A == byte) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_ZP:
+                {
+                    uint8_t addr = readByte();
+                    cycles--; // read from memory
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_ZP_X:
+                {
+                    uint8_t addr = readByte()+X;
+                    cycles--; // read from memory
+                    cycles--; // read from X
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_ABS:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8);
+                    cycles--; // read from memory
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_ABS_X:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8)+X;
+                    cycles--; // read from memory
+                    if ( (addr >> 8) != ((addr-X) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_ABS_Y:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8)+Y;
+                    cycles--; // read from memory
+                    if ( (addr >> 8) != ((addr-Y) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_IND_X:
+                {
+                    // Use this IND X for all others!
+                    uint8_t byte = readByte()+X;
+                    uint8_t low = mem[byte];
+                    uint8_t high = mem[uint8_t(byte+1)];
+                    uint16_t addr = (low|high << 8);
+                    cycles--; // one cycle to get low
+                    cycles--; // one cycle to get high
+                    cycles--; // one cycle to bitshift
+                    cycles--; // read from memory
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CMP_IND_Y:
+                {
+                    uint8_t byte = readByte();
+                    uint8_t low = mem[byte];
+                    uint8_t high = mem[uint8_t(byte+1)];
+                    uint16_t addr = (low|high << 8)+Y;
+                    cycles--; // one cycle to get low
+                    cycles--; // one cycle to get high
+                    cycles--; // read from addr
+                    if ( (addr >> 8) != ((addr-Y) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    P.C = (A >= mem[addr]) ? 1 : 0;
+                    P.Z = (A == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CPX_IM:
+            case INS::CPY_IM:
+                {
+                    uint8_t byte = readByte();
+                    uint8_t val = 0x0;
+                    if ( ins == INS::CPX_IM ) {
+                        val = X;
+                    } else if ( ins == INS::CPY_IM ) {
+                        val = Y;
+                    }
+                    P.C = (val >= byte) ? 1 : 0;
+                    P.Z = (val == byte) ? 1 : 0;
+                }
+                break;
+            case INS::CPX_ZP:
+            case INS::CPY_ZP:
+                {
+                    uint8_t addr = readByte();
+                    uint8_t val = 0x0;
+                    if ( ins == INS::CPX_ZP ) {
+                        val = X;
+                    } else if ( ins == INS::CPY_ZP ) {
+                        val = Y;
+                    }
+                    cycles--; // read from memory
+                    P.C = (val >= mem[addr]) ? 1 : 0;
+                    P.Z = (val == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::CPX_ABS:
+            case INS::CPY_ABS:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8);
+                    uint8_t val = 0x0;
+                    if ( ins == INS::CPX_ABS ) {
+                        val = X;
+                    } else if ( ins == INS::CPY_ABS ) {
+                        val = Y;
+                    }
+                    cycles--; // read from memory
+                    P.C = (val >= mem[addr]) ? 1 : 0;
+                    P.Z = (val == mem[addr]) ? 1 : 0;
+                }
+                break;
+            case INS::BIT_ZP:
+                {
+                    uint8_t addr = readByte();
+                    uint8_t val = A & mem[addr];
+                    P.Z = (val == 0);
+                    P.V = ((mem[addr] >> 6) & 0x1);
+                    P.N = ((mem[addr] >> 7) & 0x1);
+                    cycles--; // read from memory
+                }
+                break;
+            case INS::BIT_ABS:
+                {
+                    uint8_t low = readByte();
+                    uint8_t high = readByte();
+                    uint16_t addr = (low|high << 8);
+                    uint8_t val = A & mem[addr];
+                    P.Z = (val == 0);
+                    P.V = (mem[addr] >> 6) & 0x1;
+                    P.N = (mem[addr] >> 7) & 0x1;
+                    cycles--; // read from memory
                 }
                 break;
             default:

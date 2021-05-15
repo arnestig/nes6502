@@ -162,6 +162,60 @@ enum INS
     SBC_ABS_Y = 0xF9,
     SBC_IND_X = 0xE1,
     SBC_IND_Y = 0xF1,
+
+    // Logical AND
+    AND_IM = 0x29,
+    AND_ZP = 0x25,
+    AND_ZP_X = 0x35,
+    AND_ABS = 0x2D,
+    AND_ABS_X = 0x3D,
+    AND_ABS_Y = 0x39,
+    AND_IND_X = 0x21,
+    AND_IND_Y = 0x31,
+
+    // Logical inclusive OR
+    ORA_IM = 0x09,
+    ORA_ZP = 0x05,
+    ORA_ZP_X = 0x15,
+    ORA_ABS = 0x0D,
+    ORA_ABS_X = 0x1D,
+    ORA_ABS_Y = 0x19,
+    ORA_IND_X = 0x01,
+    ORA_IND_Y = 0x11,
+
+    // Exclusive OR
+    EOR_IM = 0x49,
+    EOR_ZP = 0x45,
+    EOR_ZP_X = 0x55,
+    EOR_ABS = 0x4D,
+    EOR_ABS_X = 0x5D,
+    EOR_ABS_Y = 0x59,
+    EOR_IND_X = 0x41,
+    EOR_IND_Y = 0x51,
+
+    // Bit Test
+    BIT_ZP = 0x24,
+    BIT_ABS = 0x2C,
+
+    // Compare
+    CMP_IM = 0xC9,
+    CMP_ZP = 0xC5,
+    CMP_ZP_X = 0xD5,
+    CMP_ABS = 0xCD,
+    CMP_ABS_X = 0xDD,
+    CMP_ABS_Y = 0xD9,
+    CMP_IND_X = 0xC1,
+    CMP_IND_Y = 0xD1,
+
+    // Compare X
+    CPX_IM = 0xE0,
+    CPX_ZP = 0xE4,
+    CPX_ABS = 0xEC,
+
+    // Compare Y
+    CPY_IM = 0xC0,
+    CPY_ZP = 0xC4,
+    CPY_ABS = 0xCC,
 };
 
 struct CPU
