@@ -910,55 +910,95 @@ void CPU::execute(int8_t c)
                 }
                 break;
             case INS::ADC_IM:
+            case INS::SBC_IM:
                 {
                     uint8_t byte = readByte();
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+byte+P.C) & 0x100) != 0;
-                    A += byte + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_IM ) {
+                        P.C = ((A+byte+P.C) & 0x100) != 0;
+                        newA = A + byte + oldCarry;
+                    } else if ( ins == INS::SBC_IM ) {
+                        newA = A - byte - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     A_status_flags();
                 }
                 break;
             case INS::ADC_ZP:
+            case INS::SBC_ZP:
                 {
                     uint8_t byte = readByte();
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
-                    A += mem[byte] + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_ZP ) {
+                        P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
+                        newA = A + mem[byte] + oldCarry;
+                    } else if ( ins == INS::SBC_ZP ) {
+                        newA = A - mem[byte] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     cycles--; // read from memory
                     A_status_flags();
                 }
                 break;
             case INS::ADC_ZP_X:
+            case INS::SBC_ZP_X:
                 {
                     uint8_t byte = readByte()+X;
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
-                    A += mem[byte] + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_ZP_X ) {
+                        P.C = ((A+mem[byte]+P.C) & 0x100) != 0;
+                        newA = A + mem[byte] + oldCarry;
+                    } else if ( ins == INS::SBC_ZP_X ) {
+                        newA = A - mem[byte] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     cycles--; // read from memory
                     cycles--; // read from X
                     A_status_flags();
                 }
                 break;
             case INS::ADC_ABS:
+            case INS::SBC_ABS:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
                     uint16_t addr = (low|high << 8);
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
-                    A += mem[addr] + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_ABS ) {
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
+                    } else if ( ins == INS::SBC_ABS ) {
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     cycles--; // read from memory
                     A_status_flags();
                 }
                 break;
             case INS::ADC_ABS_X:
+            case INS::SBC_ABS_X:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
                     uint16_t addr = (low|high << 8)+X;
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
-                    A += mem[addr] + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_ABS_X ) {
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
+                    } else if ( ins == INS::SBC_ABS_X ) {
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     cycles--; // read from memory
                     if ( (addr >> 8) != ((addr-X) >> 8) ) {
                         cycles--; // extra for page break
@@ -967,13 +1007,21 @@ void CPU::execute(int8_t c)
                 }
                 break;
             case INS::ADC_ABS_Y:
+            case INS::SBC_ABS_Y:
                 {
                     uint8_t low = readByte();
                     uint8_t high = readByte();
                     uint16_t addr = (low|high << 8)+Y;
                     uint8_t oldCarry = P.C;
-                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
-                    A += mem[addr] + oldCarry;
+                    uint8_t newA = 0x0;
+                    if ( ins == INS::ADC_ABS_Y ) {
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
+                    } else if ( ins == INS::SBC_ABS_Y ) {
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     cycles--; // read from memory
                     if ( (addr >> 8) != ((addr-Y) >> 8) ) {
                         cycles--; // extra for page break
@@ -982,6 +1030,7 @@ void CPU::execute(int8_t c)
                 }
                 break;
             case INS::ADC_IND_X:
+            case INS::SBC_IND_X:
                 {
                     // Use this IND X for all others!
                     uint8_t byte = readByte()+X;
@@ -989,17 +1038,46 @@ void CPU::execute(int8_t c)
                     uint8_t high = mem[uint8_t(byte+1)];
                     uint16_t addr = (low|high << 8);
                     uint8_t oldCarry = P.C;
+                    uint8_t newA = 0x0;
                     cycles--; // one cycle to get low
                     cycles--; // one cycle to get high
                     cycles--; // one cycle to bitshift
                     cycles--; // read from memory
-                    P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
-                    A += mem[addr] + oldCarry;
+                    if ( ins == INS::ADC_IND_X ) {
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
+                    } else if ( ins == INS::SBC_IND_X ) {
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
                     A_status_flags();
                 }
                 break;
             case INS::ADC_IND_Y:
+            case INS::SBC_IND_Y:
                 {
+                    uint8_t byte = readByte();
+                    uint8_t low = mem[byte];
+                    uint8_t high = mem[uint8_t(byte+1)];
+                    uint16_t addr = (low|high << 8)+Y;
+                    uint8_t oldCarry = P.C;
+                    uint8_t newA = 0x0;
+                    cycles--; // one cycle to get low
+                    cycles--; // one cycle to get high
+                    cycles--; // read from addr
+                    if ( (addr >> 8) != ((addr-Y) >> 8) ) {
+                        cycles--; // extra for page break
+                    }
+                    if ( ins == INS::ADC_IND_Y ) {
+                        P.C = ((A+mem[addr]+P.C) & 0x100) != 0;
+                        newA = A + mem[addr] + oldCarry;
+                    } else if ( ins == INS::SBC_IND_Y ) {
+                        newA = A - mem[addr] - (1-oldCarry);
+                        P.C = (A < newA) ? 0 : 1;
+                    }
+                    A = newA;
+                    A_status_flags();
                 }
                 break;
             default:
