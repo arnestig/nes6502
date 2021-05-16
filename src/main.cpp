@@ -96,9 +96,6 @@ int main( int argc, char* argv[])
     // printf("status: %x\n",cpu.mem[0x6000]);
     // cpu.dumpMemory(0x6000);
 
-    cpu.reset();
-    printf("CPU: %x\n",cpu.getStatusByte());
-    printf("A: %x, X: %x, P.Z: %x\n",cpu.A,cpu.X,cpu.P.Z);
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
