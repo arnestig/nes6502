@@ -19,13 +19,14 @@ TEST(CPU_6502, PHA_IMP) {
 // Test PHP implied instruction
 TEST(CPU_6502, PHP_IMP) {
     cpu.reset();
-    cpu.P.C = 1; // bit 1
-    cpu.P.Z = 0; // bit 2
-    cpu.P.I = 1; // bit 3
-    cpu.P.D = 0; // bit 4
-    cpu.P.B = 1; // bit 5
-    cpu.P.V = 0; // bit 6
-    cpu.P.N = 1; // bit 7
+    cpu.P.C = 1; // bit 0
+    cpu.P.Z = 0; // bit 1
+    cpu.P.I = 1; // bit 2
+    cpu.P.D = 0; // bit 3
+    cpu.P.B = 1; // bit 4
+    cpu.P.U = 0; // bit 5
+    cpu.P.V = 1; // bit 6
+    cpu.P.N = 0; // bit 7
     cpu.mem[0x1000] = INS::PHP_IMP;
     cpu.execute(3);
     EXPECT_EQ(cpu.mem[0x100 + cpu.S + 1],0x55);

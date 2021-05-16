@@ -224,19 +224,20 @@ struct CPU
     uint16_t PC; // program counter
     uint8_t S; // stack pointer
 
-    int8_t cycles;
+    int16_t cycles;
 
     bool exception; // flag only used for unit tests
 
     // Processor status bits
     struct {
-        uint8_t N : 1; // negative
-        uint8_t V : 1; // overflow
-        uint8_t B : 1; // break
-        uint8_t D : 1; // deccimal mode
-        uint8_t I : 1; // interrupt disable mode
-        uint8_t Z : 1; // zero flag
-        uint8_t C : 1; // carry flag
+        uint8_t N : 1; // negative, bit 7
+        uint8_t V : 1; // overflow, bit 6
+        uint8_t U : 1; // unused, bit 5
+        uint8_t B : 1; // break, bit 4
+        uint8_t D : 1; // deccimal mode, bit 3
+        uint8_t I : 1; // interrupt disable mode, bit 2
+        uint8_t Z : 1; // zero flag, bit 1
+        uint8_t C : 1; // carry flag, bit 0
     } P;
 
     uint8_t A; // accumulator
@@ -269,7 +270,7 @@ struct CPU
     void Y_status_flags();
     void M_status_flags( uint8_t M );
 
-    void execute(int8_t c);
+    void execute(int16_t c);
 };
 
 #endif

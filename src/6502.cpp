@@ -18,12 +18,13 @@ void CPU::setStatusBits( uint8_t byte ) {
     P.I = (byte & (1 << 2)) != 0;
     P.D = (byte & (1 << 3)) != 0;
     P.B = (byte & (1 << 4)) != 0;
-    P.V = (byte & (1 << 5)) != 0;
-    P.N = (byte & (1 << 6)) != 0;
+    P.U = (byte & (1 << 5)) != 0;
+    P.V = (byte & (1 << 6)) != 0;
+    P.N = (byte & (1 << 7)) != 0;
 };
 
 uint8_t CPU::getStatusByte() {
-    return (P.N << 6|P.V << 5|P.B << 4|P.D << 3|P.I << 2|P.Z << 1|P.C << 0);
+    return (P.N << 7|P.V << 6|P.U << 5|P.B << 4|P.D << 3|P.I << 2|P.Z << 1|P.C << 0);
 };
 
 void CPU::reset()
@@ -57,6 +58,9 @@ void CPU::reset()
 
     // process status
     P = {0};
+    P.U = 1;
+    P.B = 1;
+    P.I = 1;
 
     // exception, used for testing
     exception = false;
@@ -130,7 +134,7 @@ void CPU::M_status_flags( uint8_t M )
     P.N = ( M & 0x80 ) != 0;
 };
 
-void CPU::execute(int8_t c)
+void CPU::execute(int16_t c)
 {
     cycles = c;
     while ( cycles > 0 && exception == false ) {

@@ -50,7 +50,7 @@ TEST(CPU_6502, CLV) {
     cpu.P.V = 1;
     cpu.mem[0x1000] = INS::CLV_IM;
     cpu.execute(2);
-    EXPECT_EQ(cpu.P.I, 0);
+    EXPECT_EQ(cpu.P.V, 0);
     checkCyclesAndException();
 }
 
