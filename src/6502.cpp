@@ -3,10 +3,11 @@
 void CPU::branchInstruction( bool takeBranch )
 {
     uint8_t byte = readByte();
+    int8_t position = byte;
     if ( takeBranch ) {
         cycles--;
-        PC += byte;
-        if (( PC >> 8) != ( (PC-byte) >> 8 )) { // if to a new page
+        PC += position;
+        if (( PC >> 8) != ( (PC-position) >> 8 )) { // if to a new page
             cycles--;
         }
     }
@@ -139,6 +140,7 @@ void CPU::execute(int16_t c)
     cycles = c;
     while ( cycles > 0 && exception == false ) {
         uint8_t ins = readByte();
+        printf("Instruction: %x\n",ins);
         switch ( ins ) {
             case INS::LDA_IM:
                 {

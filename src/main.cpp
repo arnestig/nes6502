@@ -7,7 +7,7 @@ struct CPU cpu;
 
 void loadNESFile()
 {
-    std::ifstream ifs("registers.nes", std::ios_base::in | std::ios_base::binary);
+    std::ifstream ifs("nestest.nes", std::ios_base::in | std::ios_base::binary);
     if ( ifs ) {
         uint8_t header[16];
         if (!ifs.read(reinterpret_cast<char*>(&header[0]),0x10)) {
@@ -87,13 +87,37 @@ TEST(CPU_6502, NOP) {
     checkCyclesAndException();
 }
 
+// Test BNE
+// 0600: a2 08 ca 8e 00 02 e0 03 d0 f8 8e 01 02 00
+// Load X to 8, decrease X, compare X with 3, jump back to decrease if not equal
+TEST(CPU_6502, BNE_PROGRAM) {
+    cpu.reset();
+    cpu.mem[0x1000] = 0xA2;
+    cpu.mem[0x1001] = 0x08;
+    cpu.mem[0x1002] = 0xCA;
+    cpu.mem[0x1003] = 0x8E;
+    cpu.mem[0x1004] = 0x00;
+    cpu.mem[0x1005] = 0x02;
+    cpu.mem[0x1006] = 0xE0;
+    cpu.mem[0x1007] = 0x03;
+    cpu.mem[0x1008] = 0xD0;
+    cpu.mem[0x1009] = 0xF8;
+    cpu.mem[0x100A] = 0x8E;
+    cpu.mem[0x100B] = 0x01;
+    cpu.mem[0x100C] = 0x02;
+    cpu.mem[0x100D] = 0x00;
+    cpu.execute(100);
+    EXPECT_EQ(cpu.X,0x3);
+}
+
 int main( int argc, char* argv[])
 {
     // cpu.reset();
     // loadNESFile();
     // cpu.PC = ( cpu.mem[0xFFFC] | (cpu.mem[0xFFFD] << 8));
-    // cpu.execute(100);
+    // cpu.execute(4000);
     // printf("status: %x\n",cpu.mem[0x6000]);
+    // printf("executions: %d\n",cpu.cycles);
     // cpu.dumpMemory(0x6000);
 
     ::testing::InitGoogleTest(&argc, argv);

@@ -83,11 +83,12 @@ TEST(CPU_6502,BCC_REL_CARRY) {
 // Test BCC relative instruction with carry clear
 TEST(CPU_6502,BCC_REL_CARRY_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BCC_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BCC_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.C = 0;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -116,11 +117,12 @@ TEST(CPU_6502,BCS_REL_CARRY) {
 // Test BCS relative instruction with carry set
 TEST(CPU_6502,BCS_REL_CARRY_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BCS_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BCS_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.C = 1;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -149,11 +151,12 @@ TEST(CPU_6502,BEQ_REL_ZERO) {
 // Test BEQ relative instruction with zero set
 TEST(CPU_6502,BEQ_REL_ZERO_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BEQ_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BEQ_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.Z = 1;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -182,11 +185,12 @@ TEST(CPU_6502,BNE_REL_ZERO) {
 // Test BNE relative instruction with zero clear
 TEST(CPU_6502,BNE_REL_ZERO_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BNE_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BNE_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.Z = 0;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -215,11 +219,12 @@ TEST(CPU_6502,BMI_REL_NEGATIVE) {
 // Test BMI relative instruction with negative set
 TEST(CPU_6502,BMI_REL_NEGATIVE_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BMI_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BMI_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.N = 1;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -248,11 +253,12 @@ TEST(CPU_6502,BPL_REL_NEGATIVE) {
 // Test BPL relative instruction with negative clear
 TEST(CPU_6502,BPL_REL_NEGATIVE_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BPL_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BPL_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.V = 0;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -281,11 +287,12 @@ TEST(CPU_6502,BVS_REL_OVERFLOW) {
 // Test BVS relative instruction with overflow set
 TEST(CPU_6502,BVS_REL_OVERFLOW_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BVS_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BVS_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.V = 1;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
@@ -314,11 +321,12 @@ TEST(CPU_6502,BVC_REL_OVERFLOW) {
 // Test BVC relative instruction with overflow clear
 TEST(CPU_6502,BVC_REL_OVERFLOW_PAGE) {
     cpu.reset();
-    cpu.mem[0x1000] = INS::BVC_REL;
-    cpu.mem[0x1001] = 0xFF;
+    cpu.mem[0x10F0] = INS::BVC_REL;
+    cpu.mem[0x10F1] = 0x20;
+    cpu.PC = 0x10F0;
     cpu.P.N = 0;
     cpu.execute(4);
-    EXPECT_EQ(cpu.PC,0x1101);
+    EXPECT_EQ(cpu.PC,0x1112);
     checkCyclesAndException();
 }
 
