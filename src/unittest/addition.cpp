@@ -6,7 +6,7 @@ extern struct CPU cpu;
 extern void checkCyclesAndException();
 // Test ADC immediate instruction
 TEST(CPU_6502, ADC_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::ADC_IM;
@@ -16,9 +16,66 @@ TEST(CPU_6502, ADC_IM) {
     checkCyclesAndException();
 }
 
+// Test ADC immediate instruction
+TEST(CPU_6502, ADC_IM_C0_REMAIN_CLEAR) {
+    cpu.powerOn( 0x1000 );
+    cpu.mem[0x1000] = INS::LDA_IM;
+    cpu.mem[0x1001] = 0xFE;
+    cpu.mem[0x1002] = INS::CLC_IM;
+    cpu.mem[0x1003] = INS::ADC_IM;
+    cpu.mem[0x1004] = 0x1;
+    cpu.execute(6);
+    EXPECT_EQ(cpu.A,0xFF);
+    EXPECT_EQ(cpu.P.C,0x0);
+    checkCyclesAndException();
+}
+
+// Test ADC immediate instruction
+TEST(CPU_6502, ADC_IM_C1_GETS_CLEAR) {
+    cpu.powerOn( 0x1000 );
+    cpu.mem[0x1000] = INS::LDA_IM;
+    cpu.mem[0x1001] = 0xFE;
+    cpu.mem[0x1002] = INS::SEC_IM;
+    cpu.mem[0x1003] = INS::ADC_IM;
+    cpu.mem[0x1004] = 0x0;
+    cpu.execute(6);
+    EXPECT_EQ(cpu.A,0xFF);
+    EXPECT_EQ(cpu.P.C,0x0);
+    checkCyclesAndException();
+}
+
+// Test ADC immediate instruction
+TEST(CPU_6502, ADC_IM_C1_CARRY_SET) {
+    cpu.powerOn( 0x1000 );
+    cpu.mem[0x1000] = INS::LDA_IM;
+    cpu.mem[0x1001] = 0xFE;
+    cpu.mem[0x1002] = INS::SEC_IM;
+    cpu.mem[0x1003] = INS::ADC_IM;
+    cpu.mem[0x1004] = 0x1;
+    cpu.execute(6);
+    EXPECT_EQ(cpu.A,0x00);
+    EXPECT_EQ(cpu.P.C,0x1);
+    checkCyclesAndException();
+}
+
+// Test ADC immediate instruction
+TEST(CPU_6502, ADC_IM_C0_CARRY_SET) {
+    cpu.powerOn( 0x1000 );
+    cpu.mem[0x1000] = INS::LDA_IM;
+    cpu.mem[0x1001] = 0xFE;
+    cpu.mem[0x1002] = INS::CLC_IM;
+    cpu.mem[0x1003] = INS::ADC_IM;
+    cpu.mem[0x1004] = 0x10;
+    cpu.execute(6);
+    EXPECT_EQ(cpu.A,0x0E);
+    EXPECT_EQ(cpu.P.C,0x1);
+    checkCyclesAndException();
+}
+
+
 // Test ADC immediate instruction with overflow
 TEST(CPU_6502, ADC_IM_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_IM;
@@ -33,7 +90,7 @@ TEST(CPU_6502, ADC_IM_OVERFLOW) {
 
 // Test ADC immediate instruction with overflow resulting in 0
 TEST(CPU_6502, ADC_IM_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_IM;
@@ -48,7 +105,7 @@ TEST(CPU_6502, ADC_IM_OVERFLOW_ZERO) {
 
 // Test ADC ZeroPage
 TEST(CPU_6502, ADC_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::ADC_ZP;
@@ -61,7 +118,7 @@ TEST(CPU_6502, ADC_ZP) {
 
 // Test ADC ZeroPage with overflow
 TEST(CPU_6502, ADC_ZP_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_ZP;
@@ -77,7 +134,7 @@ TEST(CPU_6502, ADC_ZP_OVERFLOW) {
 
 // Test ADC ZeroPage with overflow resulting in 0
 TEST(CPU_6502, ADC_ZP_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_ZP;
@@ -94,7 +151,7 @@ TEST(CPU_6502, ADC_ZP_OVERFLOW_ZERO) {
 
 // Test ADC ZeroPage X
 TEST(CPU_6502, ADC_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -109,7 +166,7 @@ TEST(CPU_6502, ADC_ZP_X) {
 
 // Test ADC ZeroPage X with overflow
 TEST(CPU_6502, ADC_ZP_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -127,7 +184,7 @@ TEST(CPU_6502, ADC_ZP_X_OVERFLOW) {
 
 // Test ADC ZeroPage X with overflow resulting in 0
 TEST(CPU_6502, ADC_ZP_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -145,7 +202,7 @@ TEST(CPU_6502, ADC_ZP_X_OVERFLOW_ZERO) {
 
 // Test ADC Absolute
 TEST(CPU_6502, ADC_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::ADC_ABS;
@@ -159,7 +216,7 @@ TEST(CPU_6502, ADC_ABS) {
 
 // Test ADC Absolute with overflow
 TEST(CPU_6502, ADC_ABS_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_ABS;
@@ -176,7 +233,7 @@ TEST(CPU_6502, ADC_ABS_OVERFLOW) {
 
 // Test ADC Absolute with overflow resulting in 0
 TEST(CPU_6502, ADC_ABS_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::ADC_ABS;
@@ -193,7 +250,7 @@ TEST(CPU_6502, ADC_ABS_OVERFLOW_ZERO) {
 
 // Test ADC Absolute X
 TEST(CPU_6502, ADC_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -209,7 +266,7 @@ TEST(CPU_6502, ADC_ABS_X) {
 
 // Test ADC Absolute X, page crossed
 TEST(CPU_6502, ADC_ABS_X_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -225,7 +282,7 @@ TEST(CPU_6502, ADC_ABS_X_PAGE_CROSS) {
 
 // Test ADC Absolute X with overflow
 TEST(CPU_6502, ADC_ABS_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -244,7 +301,7 @@ TEST(CPU_6502, ADC_ABS_X_OVERFLOW) {
 
 // Test ADC Absolute X with overflow resulting in 0
 TEST(CPU_6502, ADC_ABS_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -264,7 +321,7 @@ TEST(CPU_6502, ADC_ABS_X_OVERFLOW_ZERO) {
 
 // Test ADC Absolute Y
 TEST(CPU_6502, ADC_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -280,7 +337,7 @@ TEST(CPU_6502, ADC_ABS_Y) {
 
 // Test ADC Absolute Y, page crossed
 TEST(CPU_6502, ADC_ABS_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -296,7 +353,7 @@ TEST(CPU_6502, ADC_ABS_Y_PAGE_CROSS) {
 
 // Test ADC Absolute Y with overflow
 TEST(CPU_6502, ADC_ABS_Y_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -315,7 +372,7 @@ TEST(CPU_6502, ADC_ABS_Y_OVERFLOW) {
 
 // Test ADC Absolute Y with overflow resulting in 0
 TEST(CPU_6502, ADC_ABS_Y_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -335,7 +392,7 @@ TEST(CPU_6502, ADC_ABS_Y_OVERFLOW_ZERO) {
 
 // Test ADC Indirect X
 TEST(CPU_6502, ADC_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -352,7 +409,7 @@ TEST(CPU_6502, ADC_IND_X) {
 
 // Test ADC Indirect X, ZP wrap
 TEST(CPU_6502, ADC_IND_X_ZP_WRAP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -369,7 +426,7 @@ TEST(CPU_6502, ADC_IND_X_ZP_WRAP) {
 
 // Test ADC Indirect X with overflow
 TEST(CPU_6502, ADC_IND_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -389,7 +446,7 @@ TEST(CPU_6502, ADC_IND_X_OVERFLOW) {
 
 // Test ADC Indirect X with overflow resulting in 0
 TEST(CPU_6502, ADC_IND_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -409,7 +466,7 @@ TEST(CPU_6502, ADC_IND_X_OVERFLOW_ZERO) {
 
 // Test ADC Indirect Y
 TEST(CPU_6502, ADC_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -426,7 +483,7 @@ TEST(CPU_6502, ADC_IND_Y) {
 
 // Test ADC Indirect Y, ZP wrap
 TEST(CPU_6502, ADC_IND_Y_ZP_WRAP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -443,7 +500,7 @@ TEST(CPU_6502, ADC_IND_Y_ZP_WRAP) {
 
 // Test ADC Indirect Y with overflow
 TEST(CPU_6502, ADC_IND_Y_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -463,7 +520,7 @@ TEST(CPU_6502, ADC_IND_Y_OVERFLOW) {
 
 // Test ADC Indirect Y with overflow resulting in 0
 TEST(CPU_6502, ADC_IND_Y_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -483,7 +540,7 @@ TEST(CPU_6502, ADC_IND_Y_OVERFLOW_ZERO) {
 
 // Test SBC immediate instruction
 TEST(CPU_6502, SBC_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::SBC_IM;
@@ -496,7 +553,7 @@ TEST(CPU_6502, SBC_IM) {
 
 // Test SBC immediate instruction with overflow
 TEST(CPU_6502, SBC_IM_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x02;
     cpu.mem[0x1002] = INS::SEC_IM;
@@ -512,7 +569,7 @@ TEST(CPU_6502, SBC_IM_OVERFLOW) {
 
 // Test SBC immediate instruction with margin
 TEST(CPU_6502, SBC_IM_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xAD;
     cpu.mem[0x1002] = INS::SBC_IM;
@@ -527,7 +584,7 @@ TEST(CPU_6502, SBC_IM_OVERFLOW_MARGIN) {
 
 // Test SBC immediate instruction with margin
 TEST(CPU_6502, SBC_IM_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xAD;
     cpu.mem[0x1002] = INS::SBC_IM;
@@ -543,7 +600,7 @@ TEST(CPU_6502, SBC_IM_OVERFLOW_ZERO) {
 
 // Test SBC ZeroPage instruction
 TEST(CPU_6502, SBC_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::SBC_ZP;
@@ -557,7 +614,7 @@ TEST(CPU_6502, SBC_ZP) {
 
 // Test SBC ZeroPage instruction with overflow
 TEST(CPU_6502, SBC_ZP_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x02;
     cpu.mem[0x1002] = INS::SEC_IM;
@@ -574,7 +631,7 @@ TEST(CPU_6502, SBC_ZP_OVERFLOW) {
 
 // Test SBC ZeroPage instruction with margin
 TEST(CPU_6502, SBC_ZP_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xAD;
     cpu.mem[0x1002] = INS::SBC_ZP;
@@ -590,7 +647,7 @@ TEST(CPU_6502, SBC_ZP_OVERFLOW_MARGIN) {
 
 // Test SBC ZeroPage instruction overflow, result 0
 TEST(CPU_6502, SBC_ZP_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xAD;
     cpu.mem[0x1002] = INS::SBC_ZP;
@@ -607,7 +664,7 @@ TEST(CPU_6502, SBC_ZP_OVERFLOW_ZERO) {
 
 // Test SBC ZeroPage X instruction
 TEST(CPU_6502, SBC_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -623,7 +680,7 @@ TEST(CPU_6502, SBC_ZP_X) {
 
 // Test SBC ZeroPage X instruction with overflow
 TEST(CPU_6502, SBC_ZP_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -642,7 +699,7 @@ TEST(CPU_6502, SBC_ZP_X_OVERFLOW) {
 
 // Test SBC ZeroPage X instruction with margin
 TEST(CPU_6502, SBC_ZP_X_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -660,7 +717,7 @@ TEST(CPU_6502, SBC_ZP_X_OVERFLOW_MARGIN) {
 
 // Test SBC ZeroPage X instruction overflow, result 0
 TEST(CPU_6502, SBC_ZP_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -679,7 +736,7 @@ TEST(CPU_6502, SBC_ZP_X_OVERFLOW_ZERO) {
 
 // Test SBC Absolute instruction
 TEST(CPU_6502, SBC_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -696,7 +753,7 @@ TEST(CPU_6502, SBC_ABS) {
 
 // Test SBC Absolute instruction with overflow
 TEST(CPU_6502, SBC_ABS_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -716,7 +773,7 @@ TEST(CPU_6502, SBC_ABS_OVERFLOW) {
 
 // Test SBC Absolute instruction with margin
 TEST(CPU_6502, SBC_ABS_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -735,7 +792,7 @@ TEST(CPU_6502, SBC_ABS_OVERFLOW_MARGIN) {
 
 // Test SBC Absolute instruction overflow, result 0
 TEST(CPU_6502, SBC_ABS_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -755,7 +812,7 @@ TEST(CPU_6502, SBC_ABS_OVERFLOW_ZERO) {
 
 // Test SBC Absolute X instruction
 TEST(CPU_6502, SBC_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -772,7 +829,7 @@ TEST(CPU_6502, SBC_ABS_X) {
 
 // Test SBC Absolute X instruction with page cross
 TEST(CPU_6502, SBC_ABS_X_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -790,7 +847,7 @@ TEST(CPU_6502, SBC_ABS_X_PAGE_CROSS) {
 
 // Test SBC Absolute X instruction with overflow
 TEST(CPU_6502, SBC_ABS_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -810,7 +867,7 @@ TEST(CPU_6502, SBC_ABS_X_OVERFLOW) {
 
 // Test SBC Absolute X instruction with margin
 TEST(CPU_6502, SBC_ABS_X_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -829,7 +886,7 @@ TEST(CPU_6502, SBC_ABS_X_OVERFLOW_MARGIN) {
 
 // Test SBC Absolute X instruction overflow, result 0
 TEST(CPU_6502, SBC_ABS_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -850,7 +907,7 @@ TEST(CPU_6502, SBC_ABS_X_OVERFLOW_ZERO) {
 
 // Test SBC Absolute Y instruction
 TEST(CPU_6502, SBC_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -868,7 +925,7 @@ TEST(CPU_6502, SBC_ABS_Y) {
 
 // Test SBC Absolute Y instruction with page cross
 TEST(CPU_6502, SBC_ABS_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xF7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -885,7 +942,7 @@ TEST(CPU_6502, SBC_ABS_Y_PAGE_CROSS) {
 
 // Test SBC Absolute Y instruction with overflow
 TEST(CPU_6502, SBC_ABS_Y_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -905,7 +962,7 @@ TEST(CPU_6502, SBC_ABS_Y_OVERFLOW) {
 
 // Test SBC Absolute Y instruction with margin
 TEST(CPU_6502, SBC_ABS_Y_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -924,7 +981,7 @@ TEST(CPU_6502, SBC_ABS_Y_OVERFLOW_MARGIN) {
 
 // Test SBC Absolute Y instruction overflow, result 0
 TEST(CPU_6502, SBC_ABS_Y_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -943,7 +1000,7 @@ TEST(CPU_6502, SBC_ABS_Y_OVERFLOW_ZERO) {
 
 // Test SBC Indirect X instruction
 TEST(CPU_6502, SBC_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -961,7 +1018,7 @@ TEST(CPU_6502, SBC_IND_X) {
 
 // Test SBC Indirect X instruction with overflow
 TEST(CPU_6502, SBC_IND_X_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -982,7 +1039,7 @@ TEST(CPU_6502, SBC_IND_X_OVERFLOW) {
 
 // Test SBC Indirect X instruction with margin
 TEST(CPU_6502, SBC_IND_X_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1002,7 +1059,7 @@ TEST(CPU_6502, SBC_IND_X_OVERFLOW_MARGIN) {
 
 // Test SBC Indirect X instruction overflow, result 0
 TEST(CPU_6502, SBC_IND_X_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1023,7 +1080,7 @@ TEST(CPU_6502, SBC_IND_X_OVERFLOW_ZERO) {
 
 // Test SBC Indirect Y instruction
 TEST(CPU_6502, SBC_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1041,7 +1098,7 @@ TEST(CPU_6502, SBC_IND_Y) {
 
 // Test SBC Indirect Y instruction with page cross
 TEST(CPU_6502, SBC_IND_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xED;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1059,7 +1116,7 @@ TEST(CPU_6502, SBC_IND_Y_PAGE_CROSS) {
 
 // Test SBC Indirect Y instruction with overflow
 TEST(CPU_6502, SBC_IND_Y_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x3;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1080,7 +1137,7 @@ TEST(CPU_6502, SBC_IND_Y_OVERFLOW) {
 
 // Test SBC Indirect Y instruction with margin
 TEST(CPU_6502, SBC_IND_Y_OVERFLOW_MARGIN) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1100,7 +1157,7 @@ TEST(CPU_6502, SBC_IND_Y_OVERFLOW_MARGIN) {
 
 // Test SBC Indirect Y instruction overflow, result 0
 TEST(CPU_6502, SBC_IND_Y_OVERFLOW_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1120,7 +1177,7 @@ TEST(CPU_6502, SBC_IND_Y_OVERFLOW_ZERO) {
 
 // Test AND immediate instruction
 TEST(CPU_6502, AND_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::AND_IM;
@@ -1132,7 +1189,7 @@ TEST(CPU_6502, AND_IM) {
 
 // Test AND immediate instruction
 TEST(CPU_6502, AND_IM_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2A;
     cpu.mem[0x1002] = INS::AND_IM;
@@ -1145,7 +1202,7 @@ TEST(CPU_6502, AND_IM_ZERO) {
 
 // Test AND immediate instruction
 TEST(CPU_6502, AND_IM_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x90;
     cpu.mem[0x1002] = INS::AND_IM;
@@ -1158,7 +1215,7 @@ TEST(CPU_6502, AND_IM_NEGATIVE) {
 
 // Test AND ZeroPage instruction
 TEST(CPU_6502, AND_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::AND_ZP;
@@ -1171,7 +1228,7 @@ TEST(CPU_6502, AND_ZP) {
 
 // Test AND ZeroPage instruction
 TEST(CPU_6502, AND_ZP_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2A;
     cpu.mem[0x1002] = INS::AND_ZP;
@@ -1185,7 +1242,7 @@ TEST(CPU_6502, AND_ZP_ZERO) {
 
 // Test AND ZeroPage instruction
 TEST(CPU_6502, AND_ZP_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x90;
     cpu.mem[0x1002] = INS::AND_ZP;
@@ -1200,7 +1257,7 @@ TEST(CPU_6502, AND_ZP_NEGATIVE) {
 
 // Test AND ZeroPage X instruction
 TEST(CPU_6502, AND_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1215,7 +1272,7 @@ TEST(CPU_6502, AND_ZP_X) {
 
 // Test AND ZeroPage X instruction
 TEST(CPU_6502, AND_ZP_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1231,7 +1288,7 @@ TEST(CPU_6502, AND_ZP_X_ZERO) {
 
 // Test AND ZeroPage X instruction
 TEST(CPU_6502, AND_ZP_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1248,7 +1305,7 @@ TEST(CPU_6502, AND_ZP_X_NEGATIVE) {
 
 // Test AND Absolute instruction
 TEST(CPU_6502, AND_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::AND_ABS;
@@ -1262,7 +1319,7 @@ TEST(CPU_6502, AND_ABS) {
 
 // Test AND Absolute instruction
 TEST(CPU_6502, AND_ABS_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x2A;
     cpu.mem[0x1002] = INS::AND_ABS;
@@ -1277,7 +1334,7 @@ TEST(CPU_6502, AND_ABS_ZERO) {
 
 // Test AND Absolute instruction
 TEST(CPU_6502, AND_ABS_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x90;
     cpu.mem[0x1002] = INS::AND_ABS;
@@ -1292,7 +1349,7 @@ TEST(CPU_6502, AND_ABS_NEGATIVE) {
 
 // Test AND Absolute X instruction
 TEST(CPU_6502, AND_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1308,7 +1365,7 @@ TEST(CPU_6502, AND_ABS_X) {
 
 // Test AND Absolute X instruction with page cross
 TEST(CPU_6502, AND_ABS_X_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1324,7 +1381,7 @@ TEST(CPU_6502, AND_ABS_X_PAGE_CROSS) {
 
 // Test AND Absolute X instruction zero result
 TEST(CPU_6502, AND_ABS_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1341,7 +1398,7 @@ TEST(CPU_6502, AND_ABS_X_ZERO) {
 
 // Test AND Absolute X instruction negative flag
 TEST(CPU_6502, AND_ABS_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1359,7 +1416,7 @@ TEST(CPU_6502, AND_ABS_X_NEGATIVE) {
 
 // Test AND Absolute Y instruction
 TEST(CPU_6502, AND_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1375,7 +1432,7 @@ TEST(CPU_6502, AND_ABS_Y) {
 
 // Test AND Absolute Y instruction with page cross
 TEST(CPU_6502, AND_ABS_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1391,7 +1448,7 @@ TEST(CPU_6502, AND_ABS_Y_PAGE_CROSS) {
 
 // Test AND Absolute Y instruction zero result
 TEST(CPU_6502, AND_ABS_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1408,7 +1465,7 @@ TEST(CPU_6502, AND_ABS_Y_ZERO) {
 
 // Test AND Absolute Y instruction negative flag
 TEST(CPU_6502, AND_ABS_Y_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1425,7 +1482,7 @@ TEST(CPU_6502, AND_ABS_Y_NEGATIVE) {
 
 // Test AND Indirect X instruction
 TEST(CPU_6502, AND_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1442,7 +1499,7 @@ TEST(CPU_6502, AND_IND_X) {
 
 // Test AND Indirect X instruction zero result
 TEST(CPU_6502, AND_IND_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1460,7 +1517,7 @@ TEST(CPU_6502, AND_IND_X_ZERO) {
 
 // Test AND Indirect X instruction negative flag
 TEST(CPU_6502, AND_IND_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1479,7 +1536,7 @@ TEST(CPU_6502, AND_IND_X_NEGATIVE) {
 
 // Test AND Indirect Y instruction
 TEST(CPU_6502, AND_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1496,7 +1553,7 @@ TEST(CPU_6502, AND_IND_Y) {
 
 // Test AND Indirect Y instruction with page cross
 TEST(CPU_6502, AND_IND_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1513,7 +1570,7 @@ TEST(CPU_6502, AND_IND_Y_PAGE_CROSS) {
 
 // Test AND Indirect Y instruction zero result
 TEST(CPU_6502, AND_IND_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1531,7 +1588,7 @@ TEST(CPU_6502, AND_IND_Y_ZERO) {
 
 // Test AND Indirect Y instruction negative flag
 TEST(CPU_6502, AND_IND_Y_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1549,7 +1606,7 @@ TEST(CPU_6502, AND_IND_Y_NEGATIVE) {
 
 // Test BIT ZeroPage instruction, overflow flag
 TEST(CPU_6502, BIT_ZP_BIT_6) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xE0;
     cpu.mem[0x1002] = INS::BIT_ZP;
@@ -1562,7 +1619,7 @@ TEST(CPU_6502, BIT_ZP_BIT_6) {
 
 // Test BIT ZeroPage instruction, negative flag
 TEST(CPU_6502, BIT_ZP_BIT_7) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x80;
     cpu.mem[0x1002] = INS::BIT_ZP;
@@ -1575,7 +1632,7 @@ TEST(CPU_6502, BIT_ZP_BIT_7) {
 
 // Test BIT ZeroPage instruction, zero flag
 TEST(CPU_6502, BIT_ZP_BIT_ZERO_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::BIT_ZP;
@@ -1588,7 +1645,7 @@ TEST(CPU_6502, BIT_ZP_BIT_ZERO_FLAG) {
 
 // Test BIT Absolute instruction, overflow flag
 TEST(CPU_6502, BIT_ABS_BIT_6) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xE0;
     cpu.mem[0x1002] = INS::BIT_ABS;
@@ -1602,7 +1659,7 @@ TEST(CPU_6502, BIT_ABS_BIT_6) {
 
 // Test BIT Absolute instruction, negative flag
 TEST(CPU_6502, BIT_ABS_BIT_7) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x80;
     cpu.mem[0x1002] = INS::BIT_ABS;
@@ -1616,7 +1673,7 @@ TEST(CPU_6502, BIT_ABS_BIT_7) {
 
 // Test BIT Absolute instruction, zero flag
 TEST(CPU_6502, BIT_ABS_BIT_ZERO_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::BIT_ABS;
@@ -1630,7 +1687,7 @@ TEST(CPU_6502, BIT_ABS_BIT_ZERO_FLAG) {
 
 // Test ORA immediate instruction
 TEST(CPU_6502, ORA_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::ORA_IM;
@@ -1642,7 +1699,7 @@ TEST(CPU_6502, ORA_IM) {
 
 // Test ORA immediate instruction, result zero
 TEST(CPU_6502, ORA_IM_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::ORA_IM;
@@ -1655,7 +1712,7 @@ TEST(CPU_6502, ORA_IM_ZERO) {
 
 // Test ORA immediate instruction, negative flag
 TEST(CPU_6502, ORA_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::ORA_IM;
@@ -1668,7 +1725,7 @@ TEST(CPU_6502, ORA_IM_NEGATIVE_FLAG) {
 
 // Test ORA ZeroPage instruction
 TEST(CPU_6502, ORA_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::ORA_ZP;
@@ -1681,7 +1738,7 @@ TEST(CPU_6502, ORA_ZP) {
 
 // Test ORA ZeroPage instruction, result zero
 TEST(CPU_6502, ORA_ZP_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::ORA_ZP;
@@ -1695,7 +1752,7 @@ TEST(CPU_6502, ORA_ZP_ZERO) {
 
 // Test ORA ZeroPage instruction, negative flag
 TEST(CPU_6502, ORA_ZP_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::ORA_ZP;
@@ -1709,7 +1766,7 @@ TEST(CPU_6502, ORA_ZP_NEGATIVE_FLAG) {
 
 // Test ORA ZeroPage, X instruction
 TEST(CPU_6502, ORA_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1724,7 +1781,7 @@ TEST(CPU_6502, ORA_ZP_X) {
 
 // Test ORA ZeroPage, X instruction, result zero
 TEST(CPU_6502, ORA_ZP_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1740,7 +1797,7 @@ TEST(CPU_6502, ORA_ZP_X_ZERO) {
 
 // Test ORA ZeroPage, X instruction, negative flag
 TEST(CPU_6502, ORA_ZP_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1756,7 +1813,7 @@ TEST(CPU_6502, ORA_ZP_X_NEGATIVE_FLAG) {
 
 // Test ORA Absolute instruction
 TEST(CPU_6502, ORA_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1772,7 +1829,7 @@ TEST(CPU_6502, ORA_ABS) {
 
 // Test ORA Absolute instruction, result zero
 TEST(CPU_6502, ORA_ABS_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1789,7 +1846,7 @@ TEST(CPU_6502, ORA_ABS_ZERO) {
 
 // Test ORA Absolute instruction, negative flag
 TEST(CPU_6502, ORA_ABS_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1806,7 +1863,7 @@ TEST(CPU_6502, ORA_ABS_NEGATIVE_FLAG) {
 
 // Test ORA Absolute X instruction
 TEST(CPU_6502, ORA_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1822,7 +1879,7 @@ TEST(CPU_6502, ORA_ABS_X) {
 
 // Test ORA Absolute X instruction, page cross
 TEST(CPU_6502, ORA_ABS_X_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1839,7 +1896,7 @@ TEST(CPU_6502, ORA_ABS_X_PAGE_CROSS) {
 
 // Test ORA Absolute X instruction, result zero
 TEST(CPU_6502, ORA_ABS_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1856,7 +1913,7 @@ TEST(CPU_6502, ORA_ABS_X_ZERO) {
 
 // Test ORA Absolute X instruction, negative flag
 TEST(CPU_6502, ORA_ABS_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1874,7 +1931,7 @@ TEST(CPU_6502, ORA_ABS_X_NEGATIVE_FLAG) {
 
 // Test ORA Absolute Y instruction
 TEST(CPU_6502, ORA_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1890,7 +1947,7 @@ TEST(CPU_6502, ORA_ABS_Y) {
 
 // Test ORA Absolute Y instruction, page cross
 TEST(CPU_6502, ORA_ABS_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1906,7 +1963,7 @@ TEST(CPU_6502, ORA_ABS_Y_PAGE_CROSS) {
 
 // Test ORA Absolute Y instruction, result zero
 TEST(CPU_6502, ORA_ABS_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1923,7 +1980,7 @@ TEST(CPU_6502, ORA_ABS_Y_ZERO) {
 
 // Test ORA Absolute Y instruction, negative flag
 TEST(CPU_6502, ORA_ABS_Y_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1942,7 +1999,7 @@ TEST(CPU_6502, ORA_ABS_Y_NEGATIVE_FLAG) {
 
 // Test ORA Indirect X instruction
 TEST(CPU_6502, ORA_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1959,7 +2016,7 @@ TEST(CPU_6502, ORA_IND_X) {
 
 // Test ORA Indirect X instruction, result zero
 TEST(CPU_6502, ORA_IND_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1977,7 +2034,7 @@ TEST(CPU_6502, ORA_IND_X_ZERO) {
 
 // Test ORA Indirect X instruction, negative flag
 TEST(CPU_6502, ORA_IND_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -1995,7 +2052,7 @@ TEST(CPU_6502, ORA_IND_X_NEGATIVE_FLAG) {
 
 // Test ORA Indirect Y instruction
 TEST(CPU_6502, ORA_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2012,7 +2069,7 @@ TEST(CPU_6502, ORA_IND_Y) {
 
 // Test ORA Indirect Y instruction, page cross
 TEST(CPU_6502, ORA_IND_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2029,7 +2086,7 @@ TEST(CPU_6502, ORA_IND_Y_PAGE_CROSS) {
 
 // Test ORA Indirect Y instruction, result zero
 TEST(CPU_6502, ORA_IND_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2047,7 +2104,7 @@ TEST(CPU_6502, ORA_IND_Y_ZERO) {
 
 // Test ORA Indirect Y instruction, negative flag
 TEST(CPU_6502, ORA_IND_Y_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2066,7 +2123,7 @@ TEST(CPU_6502, ORA_IND_Y_NEGATIVE_FLAG) {
 
 // Test EOR immediate instruction
 TEST(CPU_6502, EOR_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::EOR_IM;
@@ -2078,7 +2135,7 @@ TEST(CPU_6502, EOR_IM) {
 
 // Test EOR immediate instruction, result zero
 TEST(CPU_6502, EOR_IM_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x1;
     cpu.mem[0x1002] = INS::EOR_IM;
@@ -2091,7 +2148,7 @@ TEST(CPU_6502, EOR_IM_ZERO) {
 
 // Test EOR immediate instruction, negative flag
 TEST(CPU_6502, EOR_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xF0;
     cpu.mem[0x1002] = INS::EOR_IM;
@@ -2104,7 +2161,7 @@ TEST(CPU_6502, EOR_IM_NEGATIVE_FLAG) {
 
 // Test EOR ZeroPage instruction
 TEST(CPU_6502, EOR_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::EOR_ZP;
@@ -2117,7 +2174,7 @@ TEST(CPU_6502, EOR_ZP) {
 
 // Test EOR ZeroPage instruction, result zero
 TEST(CPU_6502, EOR_ZP_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x1;
     cpu.mem[0x1002] = INS::EOR_ZP;
@@ -2131,7 +2188,7 @@ TEST(CPU_6502, EOR_ZP_ZERO) {
 
 // Test EOR ZeroPage instruction, negative flag
 TEST(CPU_6502, EOR_ZP_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xF0;
     cpu.mem[0x1002] = INS::EOR_ZP;
@@ -2145,7 +2202,7 @@ TEST(CPU_6502, EOR_ZP_NEGATIVE_FLAG) {
 
 // Test EOR ZeroPage, X instruction
 TEST(CPU_6502, EOR_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2160,7 +2217,7 @@ TEST(CPU_6502, EOR_ZP_X) {
 
 // Test EOR ZeroPage, X instruction, result zero
 TEST(CPU_6502, EOR_ZP_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2176,7 +2233,7 @@ TEST(CPU_6502, EOR_ZP_X_ZERO) {
 
 // Test EOR ZeroPage, X instruction, negative flag
 TEST(CPU_6502, EOR_ZP_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2192,7 +2249,7 @@ TEST(CPU_6502, EOR_ZP_X_NEGATIVE_FLAG) {
 
 // Test EOR Absolute instruction
 TEST(CPU_6502, EOR_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2208,7 +2265,7 @@ TEST(CPU_6502, EOR_ABS) {
 
 // Test EOR Absolute instruction, result zero
 TEST(CPU_6502, EOR_ABS_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2225,7 +2282,7 @@ TEST(CPU_6502, EOR_ABS_ZERO) {
 
 // Test EOR Absolute instruction, negative flag
 TEST(CPU_6502, EOR_ABS_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2242,7 +2299,7 @@ TEST(CPU_6502, EOR_ABS_NEGATIVE_FLAG) {
 
 // Test EOR Absolute X instruction
 TEST(CPU_6502, EOR_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2258,7 +2315,7 @@ TEST(CPU_6502, EOR_ABS_X) {
 
 // Test EOR Absolute X instruction, page cross
 TEST(CPU_6502, EOR_ABS_X_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2275,7 +2332,7 @@ TEST(CPU_6502, EOR_ABS_X_PAGE_CROSS) {
 
 // Test EOR Absolute X instruction, result zero
 TEST(CPU_6502, EOR_ABS_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2292,7 +2349,7 @@ TEST(CPU_6502, EOR_ABS_X_ZERO) {
 
 // Test EOR Absolute X instruction, negative flag
 TEST(CPU_6502, EOR_ABS_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2310,7 +2367,7 @@ TEST(CPU_6502, EOR_ABS_X_NEGATIVE_FLAG) {
 
 // Test EOR Absolute Y instruction
 TEST(CPU_6502, EOR_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2326,7 +2383,7 @@ TEST(CPU_6502, EOR_ABS_Y) {
 
 // Test EOR Absolute Y instruction, page cross
 TEST(CPU_6502, EOR_ABS_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2342,7 +2399,7 @@ TEST(CPU_6502, EOR_ABS_Y_PAGE_CROSS) {
 
 // Test EOR Absolute Y instruction, result zero
 TEST(CPU_6502, EOR_ABS_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2359,7 +2416,7 @@ TEST(CPU_6502, EOR_ABS_Y_ZERO) {
 
 // Test EOR Absolute Y instruction, negative flag
 TEST(CPU_6502, EOR_ABS_Y_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2376,7 +2433,7 @@ TEST(CPU_6502, EOR_ABS_Y_NEGATIVE_FLAG) {
 
 // Test EOR Indirect X instruction
 TEST(CPU_6502, EOR_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2393,7 +2450,7 @@ TEST(CPU_6502, EOR_IND_X) {
 
 // Test EOR Indirect X instruction, result zero
 TEST(CPU_6502, EOR_IND_X_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2411,7 +2468,7 @@ TEST(CPU_6502, EOR_IND_X_ZERO) {
 
 // Test EOR Indirect X instruction, negative flag
 TEST(CPU_6502, EOR_IND_X_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2429,7 +2486,7 @@ TEST(CPU_6502, EOR_IND_X_NEGATIVE_FLAG) {
 
 // Test EOR Indirect Y instruction
 TEST(CPU_6502, EOR_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2446,7 +2503,7 @@ TEST(CPU_6502, EOR_IND_Y) {
 
 // Test EOR Indirect Y instruction, page cross
 TEST(CPU_6502, EOR_IND_Y_PAGE_CROSS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2463,7 +2520,7 @@ TEST(CPU_6502, EOR_IND_Y_PAGE_CROSS) {
 
 // Test EOR Indirect Y instruction, result zero
 TEST(CPU_6502, EOR_IND_Y_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -2481,7 +2538,7 @@ TEST(CPU_6502, EOR_IND_Y_ZERO) {
 
 // Test EOR Indirect Y instruction, negative flag
 TEST(CPU_6502, EOR_IND_Y_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7;
     cpu.mem[0x1002] = INS::LDA_IM;

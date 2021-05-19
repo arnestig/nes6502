@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test ASL accumulator instruction
 TEST(CPU_6502,ASL_ACC) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ASL_ACC;
@@ -19,7 +19,7 @@ TEST(CPU_6502,ASL_ACC) {
 
 // Test ASL accumulator instruction with carry flag set
 TEST(CPU_6502,ASL_ACC_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x92;
     cpu.mem[0x1002] = INS::ASL_ACC;
@@ -31,7 +31,7 @@ TEST(CPU_6502,ASL_ACC_CARRY) {
 
 // Test ASL accumulator instruction with negative flag set
 TEST(CPU_6502,ASL_ACC_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x50;
     cpu.mem[0x1002] = INS::ASL_ACC;
@@ -44,7 +44,7 @@ TEST(CPU_6502,ASL_ACC_NEGATIVE) {
 
 // Test ASL zeropage instruction
 TEST(CPU_6502,ASL_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0xA;
@@ -56,7 +56,7 @@ TEST(CPU_6502,ASL_ZP) {
 
 // Test ASL zeropage instruction with carry flag set
 TEST(CPU_6502,ASL_ZP_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x92;
@@ -68,7 +68,7 @@ TEST(CPU_6502,ASL_ZP_CARRY) {
 
 // Test ASL zeropage instruction with negative flag set
 TEST(CPU_6502,ASL_ZP_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x50;
@@ -81,7 +81,7 @@ TEST(CPU_6502,ASL_ZP_NEGATIVE) {
 
 // Test ASL zeropage X instruction
 TEST(CPU_6502,ASL_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ASL_ZP_X;
@@ -95,7 +95,7 @@ TEST(CPU_6502,ASL_ZP_X) {
 
 // Test ASL zeropage X instruction with carry flag set
 TEST(CPU_6502,ASL_ZP_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ASL_ZP_X;
@@ -109,7 +109,7 @@ TEST(CPU_6502,ASL_ZP_X_CARRY) {
 
 // Test ASL zeropage X instruction with negative flag set
 TEST(CPU_6502,ASL_ZP_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ASL_ZP_X;
@@ -125,7 +125,7 @@ TEST(CPU_6502,ASL_ZP_X_NEGATIVE) {
 
 // Test ASL absolute instruction
 TEST(CPU_6502,ASL_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -138,7 +138,7 @@ TEST(CPU_6502,ASL_ABS) {
 
 // Test ASL absolute instruction with carry flag set
 TEST(CPU_6502,ASL_ABS_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -151,7 +151,7 @@ TEST(CPU_6502,ASL_ABS_CARRY) {
 
 // Test ASL absolute instruction with negative flag set
 TEST(CPU_6502,ASL_ABS_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ASL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -165,7 +165,7 @@ TEST(CPU_6502,ASL_ABS_NEGATIVE) {
 
 // Test ASL absolute X instruction
 TEST(CPU_6502,ASL_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ASL_ABS_X;
@@ -180,7 +180,7 @@ TEST(CPU_6502,ASL_ABS_X) {
 
 // Test ASL absolute X instruction with carry flag set
 TEST(CPU_6502,ASL_ABS_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ASL_ABS_X;
@@ -195,7 +195,7 @@ TEST(CPU_6502,ASL_ABS_X_CARRY) {
 
 // Test ASL absolute X instruction with negative flag set
 TEST(CPU_6502,ASL_ABS_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ASL_ABS_X;
@@ -212,7 +212,7 @@ TEST(CPU_6502,ASL_ABS_X_NEGATIVE) {
 
 // Test LSR accumulator instruction
 TEST(CPU_6502,LSR_ACC) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x4;
     cpu.mem[0x1002] = INS::LSR_ACC;
@@ -224,7 +224,7 @@ TEST(CPU_6502,LSR_ACC) {
 
 // Test LSR accumulator instruction with carry flag set
 TEST(CPU_6502,LSR_ACC_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x9;
     cpu.mem[0x1002] = INS::LSR_ACC;
@@ -236,7 +236,7 @@ TEST(CPU_6502,LSR_ACC_CARRY) {
 
 // Test LSR zeropage instruction
 TEST(CPU_6502,LSR_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LSR_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x4;
@@ -248,7 +248,7 @@ TEST(CPU_6502,LSR_ZP) {
 
 // Test LSR zeropage instruction with carry flag set
 TEST(CPU_6502,LSR_ZP_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LSR_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x9;
@@ -260,7 +260,7 @@ TEST(CPU_6502,LSR_ZP_CARRY) {
 
 // Test LSR zeropage X instruction
 TEST(CPU_6502,LSR_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LSR_ZP_X;
@@ -274,7 +274,7 @@ TEST(CPU_6502,LSR_ZP_X) {
 
 // Test LSR zeropage X instruction with carry flag set
 TEST(CPU_6502,LSR_ZP_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LSR_ZP_X;
@@ -288,7 +288,7 @@ TEST(CPU_6502,LSR_ZP_X_CARRY) {
 
 // Test LSR absolute instruction
 TEST(CPU_6502,LSR_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LSR_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -301,7 +301,7 @@ TEST(CPU_6502,LSR_ABS) {
 
 // Test LSR absolute instruction with carry flag set
 TEST(CPU_6502,LSR_ABS_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LSR_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -314,7 +314,7 @@ TEST(CPU_6502,LSR_ABS_CARRY) {
 
 // Test LSR absolute X instruction
 TEST(CPU_6502,LSR_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LSR_ABS_X;
@@ -329,7 +329,7 @@ TEST(CPU_6502,LSR_ABS_X) {
 
 // Test LSR absolute X instruction with carry flag set
 TEST(CPU_6502,LSR_ABS_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::LSR_ABS_X;
@@ -344,7 +344,7 @@ TEST(CPU_6502,LSR_ABS_X_CARRY) {
 
 // Test ROL accumulator instruction
 TEST(CPU_6502,ROL_ACC) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ACC;
@@ -355,7 +355,7 @@ TEST(CPU_6502,ROL_ACC) {
 
 // Test ROL accumulator instruction with carry flag pre-set
 TEST(CPU_6502,ROL_ACC_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ACC;
@@ -367,7 +367,7 @@ TEST(CPU_6502,ROL_ACC_CARRY) {
 
 // Test ROL accumulator instruction with negative flag set
 TEST(CPU_6502,ROL_ACC_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x40;
     cpu.mem[0x1002] = INS::ROL_ACC;
@@ -379,7 +379,7 @@ TEST(CPU_6502,ROL_ACC_NEGATIVE) {
 
 // Test ROL zeropage instruction
 TEST(CPU_6502,ROL_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0xA;
@@ -390,7 +390,7 @@ TEST(CPU_6502,ROL_ZP) {
 
 // Test ROL zeropage instruction with carry flag pre-set
 TEST(CPU_6502,ROL_ZP_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x20;
@@ -402,7 +402,7 @@ TEST(CPU_6502,ROL_ZP_CARRY) {
 
 // Test ROL zeropage instruction with negative flag set
 TEST(CPU_6502,ROL_ZP_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x50;
@@ -414,7 +414,7 @@ TEST(CPU_6502,ROL_ZP_NEGATIVE) {
 
 // Test ROL zeropage X instruction
 TEST(CPU_6502,ROL_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ZP_X;
@@ -427,7 +427,7 @@ TEST(CPU_6502,ROL_ZP_X) {
 
 // Test ROL zeropage X instruction with carry flag pre-set
 TEST(CPU_6502,ROL_ZP_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ZP_X;
@@ -441,7 +441,7 @@ TEST(CPU_6502,ROL_ZP_X_CARRY) {
 
 // Test ROL zeropage X instruction with negative flag set
 TEST(CPU_6502,ROL_ZP_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROL_ZP_X;
@@ -456,7 +456,7 @@ TEST(CPU_6502,ROL_ZP_X_NEGATIVE) {
 
 // Test ROL absolute instruction
 TEST(CPU_6502,ROL_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -468,7 +468,7 @@ TEST(CPU_6502,ROL_ABS) {
 
 // Test ROL absolute instruction with carry flag pre-set
 TEST(CPU_6502,ROL_ABS_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -481,7 +481,7 @@ TEST(CPU_6502,ROL_ABS_CARRY) {
 
 // Test ROL absolute instruction with negative flag set
 TEST(CPU_6502,ROL_ABS_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROL_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -494,7 +494,7 @@ TEST(CPU_6502,ROL_ABS_NEGATIVE) {
 
 // Test ROL absolute X instruction
 TEST(CPU_6502,ROL_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROL_ABS_X;
@@ -508,7 +508,7 @@ TEST(CPU_6502,ROL_ABS_X) {
 
 // Test ROL absolute X instruction with carry flag pre-set
 TEST(CPU_6502,ROL_ABS_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROL_ABS_X;
@@ -523,7 +523,7 @@ TEST(CPU_6502,ROL_ABS_X_CARRY) {
 
 // Test ROL absolute X instruction with negative flag set
 TEST(CPU_6502,ROL_ABS_X_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROL_ABS_X;
@@ -538,7 +538,7 @@ TEST(CPU_6502,ROL_ABS_X_NEGATIVE) {
 
 // Test ROR accumulator instruction
 TEST(CPU_6502,ROR_ACC) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROR_ACC;
@@ -549,7 +549,7 @@ TEST(CPU_6502,ROR_ACC) {
 
 // Test ROR accumulator instruction with carry flag pre-set
 TEST(CPU_6502,ROR_ACC_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xA;
     cpu.mem[0x1002] = INS::ROR_ACC;
@@ -562,7 +562,7 @@ TEST(CPU_6502,ROR_ACC_CARRY) {
 
 // Test ROR zeropage instruction
 TEST(CPU_6502,ROR_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROR_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x4;
@@ -574,7 +574,7 @@ TEST(CPU_6502,ROR_ZP) {
 
 // Test ROR zeropage instruction with carry flag pre-set
 TEST(CPU_6502,ROR_ZP_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROR_ZP;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x0020] = 0x9;
@@ -587,7 +587,7 @@ TEST(CPU_6502,ROR_ZP_CARRY) {
 
 // Test ROR zeropage X instruction
 TEST(CPU_6502,ROR_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROR_ZP_X;
@@ -601,7 +601,7 @@ TEST(CPU_6502,ROR_ZP_X) {
 
 // Test ROR zeropage X instruction with carry flag pre-set
 TEST(CPU_6502,ROR_ZP_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::ROR_ZP_X;
@@ -616,7 +616,7 @@ TEST(CPU_6502,ROR_ZP_X_CARRY) {
 
 // Test ROR absolute instruction
 TEST(CPU_6502,ROR_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROR_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -629,7 +629,7 @@ TEST(CPU_6502,ROR_ABS) {
 
 // Test ROR absolute instruction with carry flag pre-set
 TEST(CPU_6502,ROR_ABS_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::ROR_ABS;
     cpu.mem[0x1001] = 0x20;
     cpu.mem[0x1002] = 0x25;
@@ -643,7 +643,7 @@ TEST(CPU_6502,ROR_ABS_CARRY) {
 
 // Test ROR absolute X instruction
 TEST(CPU_6502,ROR_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROR_ABS_X;
@@ -658,7 +658,7 @@ TEST(CPU_6502,ROR_ABS_X) {
 
 // Test ROR absolute X instruction with carry flag pre-set
 TEST(CPU_6502,ROR_ABS_X_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::ROR_ABS_X;

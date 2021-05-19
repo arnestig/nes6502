@@ -28,12 +28,58 @@ uint8_t CPU::getStatusByte() {
     return (P.N << 7|P.V << 6|P.U << 5|P.B << 4|P.D << 3|P.I << 2|P.Z << 1|P.C << 0);
 };
 
+bool CPU::loadNESFile( std::string file )
+{
+    std::ifstream ifs(file, std::ios_base::in | std::ios_base::binary);
+    if ( ifs ) {
+        uint8_t header[16];
+        if (!ifs.read(reinterpret_cast<char*>(&header[0]),0x10)) {
+            printf("Error reading NES file\n");
+            exception = true;
+            return false;
+        }
+        uint8_t prgbanks = header[4];
+        uint8_t chrbanks = header[5];
+        uint8_t mapper = ((header[6] >> 4) & 0xF) | (header[7] & 0xF0);
+        if ( mapper != 0 ) {
+            printf("%s: Mapper %d not supported\n",file.c_str(),mapper);
+            exception = true;
+            return false;
+        }
+        int prgsize = 1024*16*prgbanks;
+        int chrsize = 1024*8*chrbanks;
+        uint8_t prgrom[prgsize];
+        uint8_t chrrom[chrsize];
+        (void)chrrom;
+        if (!ifs.read(reinterpret_cast<char*>(&prgrom[0]),prgsize)) {
+            printf("Error reading NES file\n");
+            exception = true;
+            return false;
+        }
+        if ( prgbanks == 1 ) {
+            memcpy(&mem[0x8000],&prgrom[0],prgsize);
+            memcpy(&mem[0xC000],&prgrom[0],prgsize);
+        } else if ( prgbanks == 2 ) {
+            memcpy(&mem[0x8000],&prgrom[0],prgsize);
+        }
+
+    }
+    return true;
+}
+
 void CPU::reset()
 {
+    P.I = 1;
+    S -= 3;
+    PC = ( mem[0xFFFC] | (mem[0xFFFD] << 8));
+}
+
+void CPU::powerOn( uint16_t PC_Addr )
+{
     // reset memory
-    for ( int i = 0; i < MEM_SIZE; i++ ) {
-        mem[i] = 0;
-    }
+    // for ( int i = 0; i < MEM_SIZE; i++ ) {
+    //     mem[i] = 0;
+    // }
 
     // registers
     A = 0x0;
@@ -43,16 +89,20 @@ void CPU::reset()
     // NMI vector
 
     // reset vector
-    mem[0xFFFC] = 0x00;
-    mem[0xFFFD] = 0x10;
 
     // BRK vector
+
+    // Hack for now, used for unit testing. Load PC_Addr into FFFC-FFFD if > 0
+    if ( PC_Addr > 0  ) {
+        mem[0xFFFD] = (PC_Addr >> 8);
+        mem[0xFFFC] = PC_Addr & 0xFF;
+    }
 
     // load PC from reset vector
     PC = ( mem[0xFFFC] | (mem[0xFFFD] << 8));
 
     // stack pointer
-    S = 0xFF;
+    S = 0xFD;
 
     // cycles, used for testing
     cycles = 0;
@@ -74,14 +124,14 @@ uint8_t CPU::readByte()
     return mem[PC++];
 };
 
-// dump memory at address + 20 bytes
-void CPU::dumpMemory( uint16_t addr )
+// dump memory at address + 40 bytes
+void CPU::dumpMemory( uint16_t addr, uint8_t length )
 {
-    for ( int i = addr; i <addr+20; i++) {
+    for ( int i = addr; i <addr+length; i++) {
         if ( i == PC ) {
-            printf("0x%.4x: 0x%.2x <<<\n",i,mem[i]);
+            printf("0x%.4x: 0x%.2x (%c) <<<\n",i,mem[i],mem[i]);
         } else {
-            printf("0x%.4x: 0x%.2x\n",i,mem[i]);
+            printf("0x%.4x: 0x%.2x (%c)\n",i,mem[i],mem[i]);
         }
     }
 }
@@ -135,12 +185,12 @@ void CPU::M_status_flags( uint8_t M )
     P.N = ( M & 0x80 ) != 0;
 };
 
-void CPU::execute(int16_t c)
+void CPU::execute(int c)
 {
     cycles = c;
     while ( cycles > 0 && exception == false ) {
         uint8_t ins = readByte();
-        printf("Instruction: %x\n",ins);
+        // printf("Instruction: %x, AXY: %x,%x,%x, PC: %x\n",ins,A,X,Y,PC);
         switch ( ins ) {
             case INS::LDA_IM:
                 {
@@ -478,9 +528,63 @@ void CPU::execute(int16_t c)
                     P.I = 1;
                 }
                 break;
-            case INS::NOP_IM:
+                // standard NOP, 2 cycles
+            case INS::NOP_1A:
+            case INS::NOP_3A:
+            case INS::NOP_5A:
+            case INS::NOP_7A:
+            case INS::NOP_DA:
+            case INS::NOP_EA:
+            case INS::NOP_FA:
                 {
                     cycles--;
+                }
+                break;
+                // SKB, read an extra byte and skip it, 2 cycles
+            case INS::NOP_80:
+            case INS::NOP_82:
+            case INS::NOP_89:
+            case INS::NOP_C2:
+            case INS::NOP_E2:
+                {
+                    readByte();
+                }
+                break;
+                // IGN a, 4 cycles
+            case INS::NOP_0C:
+                {
+                    cycles -= 3;
+                }
+                break;
+                // IGN a, X. 4 or 5 cycles
+                // FIXME
+            case INS::NOP_1C:
+            case INS::NOP_3C:
+            case INS::NOP_5C:
+            case INS::NOP_7C:
+            case INS::NOP_DC:
+            case INS::NOP_FC:
+                {
+                    // cycles -= 3; // guess it depends on page crossing
+                }
+                break;
+                // IGN d, 3 cylces
+            case INS::NOP_04:
+            case INS::NOP_44:
+            case INS::NOP_64:
+                {
+                    cycles -= 2; // guess it depends on page crossing
+                }
+                break;
+                // IGN d, X. 4 cylces
+            case INS::NOP_14:
+            case INS::NOP_34:
+            case INS::NOP_54:
+            case INS::NOP_74:
+            case INS::NOP_D4:
+            case INS::NOP_F4:
+                {
+                    cycles -= 2; // guess it depends on page crossing
                 }
                 break;
             case INS::TAX_IM:
@@ -652,6 +756,9 @@ void CPU::execute(int16_t c)
                     uint8_t low = readByte();
                     uint8_t high = readByte();
                     uint8_t low_real = mem[(low|(high << 8))];
+                    if ( low == 0xFF ) { // fix for bug in original 6502, grab the xx00 high address if low is xxFF;
+                        low = 0x0;
+                    }
                     uint8_t high_real = mem[(low|(high << 8))+1];
                     cycles--; // read byte from memory
                     cycles--; // read byte from memory
@@ -707,7 +814,7 @@ void CPU::execute(int16_t c)
                 {
                     cycles--; // Read status byte
                     cycles--; // Write to stack and decrement stack
-                    mem[0x100 + S--] = getStatusByte();
+                    mem[0x100 + S--] = (getStatusByte() | 0x30); // PHP should set bit 4 and 5 on stack
                 }
                 break;
             case INS::PLA_IMP:
@@ -915,6 +1022,7 @@ void CPU::execute(int16_t c)
                     M_status_flags(mem[addr]);
                 }
                 break;
+
             case INS::ADC_IM:
             case INS::SBC_IM:
             case INS::AND_IM:
@@ -927,7 +1035,7 @@ void CPU::execute(int16_t c)
                     if ( ins == INS::ADC_IM ) {
                         P.C = ((A+byte+P.C) & 0x100) != 0;
                         newA = A + byte + oldCarry;
-                    } else if ( ins == INS::SBC_IM ) {
+                    } else if ( ins == INS::SBC_IM || ins == INS::SBC_IM_EB) {
                         newA = A - byte - (1-oldCarry);
                         P.C = (A >= newA);
                     } else if ( ins == INS::AND_IM ) {

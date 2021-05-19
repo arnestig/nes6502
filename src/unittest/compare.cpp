@@ -6,7 +6,7 @@ extern struct CPU cpu;
 extern void checkCyclesAndException();
 // Test CMP immediate instruction, carry set
 TEST(CPU_6502, CMP_IM_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CMP_IM;
@@ -18,7 +18,7 @@ TEST(CPU_6502, CMP_IM_CARRY ) {
 
 // Test CMP immediate instruction, zero set
 TEST(CPU_6502, CMP_IM_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CMP_IM;
@@ -31,7 +31,7 @@ TEST(CPU_6502, CMP_IM_ZERO ) {
 
 // Test CMP ZeroPage instruction, carry set
 TEST(CPU_6502, CMP_ZP_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CMP_ZP;
@@ -44,7 +44,7 @@ TEST(CPU_6502, CMP_ZP_CARRY ) {
 
 // Test CMP ZeroPage instruction, zero set
 TEST(CPU_6502, CMP_ZP_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CMP_ZP;
@@ -58,7 +58,7 @@ TEST(CPU_6502, CMP_ZP_ZERO ) {
 
 // Test CMP ZeroPage X instruction, carry set
 TEST(CPU_6502, CMP_ZP_X_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -73,7 +73,7 @@ TEST(CPU_6502, CMP_ZP_X_CARRY ) {
 
 // Test CMP ZeroPage X instruction, zero set
 TEST(CPU_6502, CMP_ZP_X_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -89,7 +89,7 @@ TEST(CPU_6502, CMP_ZP_X_ZERO ) {
 
 // Test CMP Absolute instruction, carry set
 TEST(CPU_6502, CMP_ABS_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -105,7 +105,7 @@ TEST(CPU_6502, CMP_ABS_CARRY ) {
 
 // Test CMP Absolute instruction, zero set
 TEST(CPU_6502, CMP_ABS_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -122,7 +122,7 @@ TEST(CPU_6502, CMP_ABS_ZERO ) {
 
 // Test CMP Absolute X instruction, carry set
 TEST(CPU_6502, CMP_ABS_X_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -138,7 +138,7 @@ TEST(CPU_6502, CMP_ABS_X_CARRY ) {
 
 // Test CMP Absolute X instruction, carry set, page cross
 TEST(CPU_6502, CMP_ABS_X_CARRY_PAGE_CROSS ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -155,7 +155,7 @@ TEST(CPU_6502, CMP_ABS_X_CARRY_PAGE_CROSS ) {
 
 // Test CMP AbsoluteX  instruction, zero set
 TEST(CPU_6502, CMP_ABS_X_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -172,7 +172,7 @@ TEST(CPU_6502, CMP_ABS_X_ZERO ) {
 
 // Test CMP Absolute Y instruction, carry set
 TEST(CPU_6502, CMP_ABS_Y_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -188,7 +188,7 @@ TEST(CPU_6502, CMP_ABS_Y_CARRY ) {
 
 // Test CMP Absolute Y instruction, carry set, page cross
 TEST(CPU_6502, CMP_ABS_Y_CARRY_PAGE_CROSS ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -205,7 +205,7 @@ TEST(CPU_6502, CMP_ABS_Y_CARRY_PAGE_CROSS ) {
 
 // Test CMP Absolute Y instruction, zero set
 TEST(CPU_6502, CMP_ABS_Y_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -222,7 +222,7 @@ TEST(CPU_6502, CMP_ABS_Y_ZERO ) {
 
 // Test CMP Indirect X instruction, carry set
 TEST(CPU_6502, CMP_IND_X_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -239,7 +239,7 @@ TEST(CPU_6502, CMP_IND_X_CARRY ) {
 
 // Test CMP Indirect X instruction, zero set
 TEST(CPU_6502, CMP_IND_X_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -257,7 +257,7 @@ TEST(CPU_6502, CMP_IND_X_ZERO ) {
 
 // Test CMP Indirect Y instruction, carry set
 TEST(CPU_6502, CMP_IND_Y_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -274,7 +274,7 @@ TEST(CPU_6502, CMP_IND_Y_CARRY ) {
 
 // Test CMP Indirect Y instruction, zero set
 TEST(CPU_6502, CMP_IND_Y_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x5;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -292,7 +292,7 @@ TEST(CPU_6502, CMP_IND_Y_ZERO ) {
 
 // Test CMP Indirect Y instruction, zero set, page cross
 TEST(CPU_6502, CMP_IND_Y_ZERO_PAGE_CROSS ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::LDA_IM;
@@ -310,7 +310,7 @@ TEST(CPU_6502, CMP_IND_Y_ZERO_PAGE_CROSS ) {
 
 // Test CPX immediate instruction, carry set
 TEST(CPU_6502, CPX_IM_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_IM;
@@ -322,7 +322,7 @@ TEST(CPU_6502, CPX_IM_CARRY ) {
 
 // Test CPX immediate instruction, zero set
 TEST(CPU_6502, CPX_IM_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_IM;
@@ -335,7 +335,7 @@ TEST(CPU_6502, CPX_IM_ZERO ) {
 
 // Test CPX ZeroPage instruction, carry set
 TEST(CPU_6502, CPX_ZP_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_ZP;
@@ -348,7 +348,7 @@ TEST(CPU_6502, CPX_ZP_CARRY ) {
 
 // Test CPX ZeroPage instruction, zero set
 TEST(CPU_6502, CPX_ZP_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_ZP;
@@ -362,7 +362,7 @@ TEST(CPU_6502, CPX_ZP_ZERO ) {
 
 // Test CPX Absolute instruction, carry set
 TEST(CPU_6502, CPX_ABS_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_ABS;
@@ -376,7 +376,7 @@ TEST(CPU_6502, CPX_ABS_CARRY ) {
 
 // Test CPX Absolute instruction, zero set
 TEST(CPU_6502, CPX_ABS_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPX_ABS;
@@ -391,7 +391,7 @@ TEST(CPU_6502, CPX_ABS_ZERO ) {
 
 // Test CPY immediate instruction, carry set
 TEST(CPU_6502, CPY_IM_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_IM;
@@ -403,7 +403,7 @@ TEST(CPU_6502, CPY_IM_CARRY ) {
 
 // Test CPY immediate instruction, zero set
 TEST(CPU_6502, CPY_IM_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_IM;
@@ -416,7 +416,7 @@ TEST(CPU_6502, CPY_IM_ZERO ) {
 
 // Test CPY ZeroPage instruction, carry set
 TEST(CPU_6502, CPY_ZP_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_ZP;
@@ -429,7 +429,7 @@ TEST(CPU_6502, CPY_ZP_CARRY ) {
 
 // Test CPY ZeroPage instruction, zero set
 TEST(CPU_6502, CPY_ZP_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_ZP;
@@ -443,7 +443,7 @@ TEST(CPU_6502, CPY_ZP_ZERO ) {
 
 // Test CPY Absolute instruction, carry set
 TEST(CPU_6502, CPY_ABS_CARRY ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_ABS;
@@ -457,7 +457,7 @@ TEST(CPU_6502, CPY_ABS_CARRY ) {
 
 // Test CPY Absolute instruction, zero set
 TEST(CPU_6502, CPY_ABS_ZERO ) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::CPY_ABS;

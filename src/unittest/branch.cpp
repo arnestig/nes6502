@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test JSR absolute instruction
 TEST(CPU_6502,JSR_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::JSR_ABS;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = 0x10;
@@ -15,13 +15,13 @@ TEST(CPU_6502,JSR_ABS) {
     EXPECT_EQ(cpu.PC,0x1025);
     EXPECT_EQ(cpu.mem[0x100 + cpu.S + 1], 0x02);
     EXPECT_EQ(cpu.mem[0x100 + cpu.S + 2], 0x10);
-    EXPECT_EQ(cpu.S, 0xfd);
+    EXPECT_EQ(cpu.S, 0xfb);
     checkCyclesAndException();
 }
 
 // Test RTS implied instruction
 TEST(CPU_6502,RTS_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::JSR_ABS;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = 0x10;
@@ -33,7 +33,7 @@ TEST(CPU_6502,RTS_IMP) {
 
 // Test RTI implied instruction
 TEST(CPU_6502,RTI_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM; // push high byte PC to stack
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::PHA_IMP;
@@ -60,7 +60,7 @@ TEST(CPU_6502,RTI_IMP) {
 
 // Test BCC relative instruction
 TEST(CPU_6502,BCC_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BCC_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.C = 1;
@@ -71,7 +71,7 @@ TEST(CPU_6502,BCC_REL) {
 
 // Test BCC relative instruction with carry clear
 TEST(CPU_6502,BCC_REL_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BCC_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.C = 0;
@@ -82,7 +82,7 @@ TEST(CPU_6502,BCC_REL_CARRY) {
 
 // Test BCC relative instruction with carry clear
 TEST(CPU_6502,BCC_REL_CARRY_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BCC_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -94,7 +94,7 @@ TEST(CPU_6502,BCC_REL_CARRY_PAGE) {
 
 // Test BCS relative instruction with carry clear
 TEST(CPU_6502,BCS_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BCS_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.C = 0;
@@ -105,7 +105,7 @@ TEST(CPU_6502,BCS_REL) {
 
 // Test BCS relative instruction with carry set
 TEST(CPU_6502,BCS_REL_CARRY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BCS_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.C = 1;
@@ -116,7 +116,7 @@ TEST(CPU_6502,BCS_REL_CARRY) {
 
 // Test BCS relative instruction with carry set
 TEST(CPU_6502,BCS_REL_CARRY_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BCS_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -128,7 +128,7 @@ TEST(CPU_6502,BCS_REL_CARRY_PAGE) {
 
 // Test BEQ relative instruction with zero clear
 TEST(CPU_6502,BEQ_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BEQ_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.Z = 0;
@@ -139,7 +139,7 @@ TEST(CPU_6502,BEQ_REL) {
 
 // Test BEQ relative instruction with zero set
 TEST(CPU_6502,BEQ_REL_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BEQ_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.Z = 1;
@@ -150,7 +150,7 @@ TEST(CPU_6502,BEQ_REL_ZERO) {
 
 // Test BEQ relative instruction with zero set
 TEST(CPU_6502,BEQ_REL_ZERO_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BEQ_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -162,7 +162,7 @@ TEST(CPU_6502,BEQ_REL_ZERO_PAGE) {
 
 // Test BNE relative instruction with zero set
 TEST(CPU_6502,BNE_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BNE_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.Z = 1;
@@ -173,7 +173,7 @@ TEST(CPU_6502,BNE_REL) {
 
 // Test BNE relative instruction with zero clear
 TEST(CPU_6502,BNE_REL_ZERO) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BNE_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.Z = 0;
@@ -184,7 +184,7 @@ TEST(CPU_6502,BNE_REL_ZERO) {
 
 // Test BNE relative instruction with zero clear
 TEST(CPU_6502,BNE_REL_ZERO_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BNE_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -196,7 +196,7 @@ TEST(CPU_6502,BNE_REL_ZERO_PAGE) {
 
 // Test BMI relative instruction with negative clear
 TEST(CPU_6502,BMI_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BMI_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.N = 0;
@@ -207,7 +207,7 @@ TEST(CPU_6502,BMI_REL) {
 
 // Test BMI relative instruction with negative set
 TEST(CPU_6502,BMI_REL_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BMI_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.N = 1;
@@ -218,7 +218,7 @@ TEST(CPU_6502,BMI_REL_NEGATIVE) {
 
 // Test BMI relative instruction with negative set
 TEST(CPU_6502,BMI_REL_NEGATIVE_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BMI_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -230,7 +230,7 @@ TEST(CPU_6502,BMI_REL_NEGATIVE_PAGE) {
 
 // Test BPL relative instruction with negative set
 TEST(CPU_6502,BPL_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BPL_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.N = 1;
@@ -241,7 +241,7 @@ TEST(CPU_6502,BPL_REL) {
 
 // Test BPL relative instruction with negative clear
 TEST(CPU_6502,BPL_REL_NEGATIVE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BPL_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.N = 0;
@@ -252,7 +252,7 @@ TEST(CPU_6502,BPL_REL_NEGATIVE) {
 
 // Test BPL relative instruction with negative clear
 TEST(CPU_6502,BPL_REL_NEGATIVE_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BPL_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -264,7 +264,7 @@ TEST(CPU_6502,BPL_REL_NEGATIVE_PAGE) {
 
 // Test BVS relative instruction with overflow clear
 TEST(CPU_6502,BVS_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BVS_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.V = 0;
@@ -275,7 +275,7 @@ TEST(CPU_6502,BVS_REL) {
 
 // Test BVS relative instruction with overflow set
 TEST(CPU_6502,BVS_REL_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BVS_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.V = 1;
@@ -286,7 +286,7 @@ TEST(CPU_6502,BVS_REL_OVERFLOW) {
 
 // Test BVS relative instruction with overflow set
 TEST(CPU_6502,BVS_REL_OVERFLOW_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BVS_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -298,7 +298,7 @@ TEST(CPU_6502,BVS_REL_OVERFLOW_PAGE) {
 
 // Test BVC relative instruction with overflow set
 TEST(CPU_6502,BVC_REL) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BVC_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.V = 1;
@@ -309,7 +309,7 @@ TEST(CPU_6502,BVC_REL) {
 
 // Test BVC relative instruction with overflow clear
 TEST(CPU_6502,BVC_REL_OVERFLOW) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BVC_REL;
     cpu.mem[0x1001] = 0x20;
     cpu.P.V = 0;
@@ -320,7 +320,7 @@ TEST(CPU_6502,BVC_REL_OVERFLOW) {
 
 // Test BVC relative instruction with overflow clear
 TEST(CPU_6502,BVC_REL_OVERFLOW_PAGE) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x10F0] = INS::BVC_REL;
     cpu.mem[0x10F1] = 0x20;
     cpu.PC = 0x10F0;
@@ -332,7 +332,7 @@ TEST(CPU_6502,BVC_REL_OVERFLOW_PAGE) {
 
 // Test BRK implied instruction
 TEST(CPU_6502,BRK_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::BRK_IMP;
     cpu.P.C = 1; // bit 0
     cpu.P.Z = 0; // bit 1

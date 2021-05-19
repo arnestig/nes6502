@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test TAX immediate instruction
 TEST(CPU_6502, TAX) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TAX_IM;
@@ -18,7 +18,7 @@ TEST(CPU_6502, TAX) {
 
 // Test TAX immediate instruction, X = 0
 TEST(CPU_6502, TAX_X_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::TAX_IM;
@@ -30,7 +30,7 @@ TEST(CPU_6502, TAX_X_0) {
 
 // Test TAX immediate instruction, negative flag
 TEST(CPU_6502, TAX_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::TAX_IM;
@@ -42,7 +42,7 @@ TEST(CPU_6502, TAX_NEGATIVE_FLAG) {
 
 // Test TAY immediate instruction
 TEST(CPU_6502, TAY) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TAY_IM;
@@ -53,7 +53,7 @@ TEST(CPU_6502, TAY) {
 
 // Test TAY immediate instruction, Y = 0
 TEST(CPU_6502, TAY_Y_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::TAY_IM;
@@ -65,7 +65,7 @@ TEST(CPU_6502, TAY_Y_0) {
 
 // Test TAY immediate instruction, negative flag
 TEST(CPU_6502, TAY_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::TAY_IM;
@@ -77,7 +77,7 @@ TEST(CPU_6502, TAY_NEGATIVE_FLAG) {
 
 // Test TSX immediate instruction
 TEST(CPU_6502, TSX) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TXS_IM;
@@ -95,7 +95,7 @@ TEST(CPU_6502, TSX) {
 
 // Test TSX immediate instruction, X = 0
 TEST(CPU_6502, TSX_X_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x0;
     cpu.mem[0x1002] = INS::TXS_IM;
@@ -114,7 +114,7 @@ TEST(CPU_6502, TSX_X_0) {
 
 // Test TSX immediate instruction, negative flag
 TEST(CPU_6502, TSX_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::TXS_IM;
@@ -133,7 +133,7 @@ TEST(CPU_6502, TSX_NEGATIVE_FLAG) {
 
 // Test TXA immediate instruction
 TEST(CPU_6502, TXA) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TXA_IM;
@@ -144,7 +144,7 @@ TEST(CPU_6502, TXA) {
 
 // Test TXA immediate instruction, A = 0
 TEST(CPU_6502, TXA_A_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::TXA_IM;
@@ -163,7 +163,7 @@ TEST(CPU_6502, TXA_A_0) {
 
 // Test TXA immediate instruction, negative flag
 TEST(CPU_6502, TXA_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::TXA_IM;
@@ -175,7 +175,7 @@ TEST(CPU_6502, TXA_NEGATIVE_FLAG) {
 
 // Test TXS immediate instruction
 TEST(CPU_6502, TXS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TXS_IM;
@@ -186,7 +186,7 @@ TEST(CPU_6502, TXS) {
 
 // Test TYA immediate instruction
 TEST(CPU_6502, TYA) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x25;
     cpu.mem[0x1002] = INS::TYA_IM;
@@ -197,7 +197,7 @@ TEST(CPU_6502, TYA) {
 
 // Test TYA immediate instruction, A = 0
 TEST(CPU_6502, TYA_A_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x10;
     cpu.mem[0x1002] = INS::TYA_IM;
@@ -216,7 +216,7 @@ TEST(CPU_6502, TYA_A_0) {
 
 // Test TYA immediate instruction, negative flag
 TEST(CPU_6502, TYA_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::TYA_IM;

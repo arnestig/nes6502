@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test STA zero page instruction
 TEST(CPU_6502,STA_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STA_ZP;
@@ -19,7 +19,7 @@ TEST(CPU_6502,STA_ZP) {
 
 // Test STA zero page X instruction
 TEST(CPU_6502,STA_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -33,7 +33,7 @@ TEST(CPU_6502,STA_ZP_X) {
 
 // Test STA absolute instruction
 TEST(CPU_6502,STA_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STA_ABS;
@@ -46,7 +46,7 @@ TEST(CPU_6502,STA_ABS) {
 
 // Test STA absolute X instruction
 TEST(CPU_6502,STA_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -61,7 +61,7 @@ TEST(CPU_6502,STA_ABS_X) {
 
 // Test STA absolute Y instruction
 TEST(CPU_6502,STA_ABS_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -76,7 +76,7 @@ TEST(CPU_6502,STA_ABS_Y) {
 
 // Test STA indirect X instruction
 TEST(CPU_6502,STA_IND_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -92,7 +92,7 @@ TEST(CPU_6502,STA_IND_X) {
 
 // Test STA indirect Y instruction
 TEST(CPU_6502,STA_IND_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -108,7 +108,7 @@ TEST(CPU_6502,STA_IND_Y) {
 
 // Test STX zero page instruction
 TEST(CPU_6502,STX_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STX_ZP;
@@ -120,7 +120,7 @@ TEST(CPU_6502,STX_ZP) {
 
 // Test STX zero page Y instruction
 TEST(CPU_6502,STX_ZP_Y) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDY_IM;
@@ -134,7 +134,7 @@ TEST(CPU_6502,STX_ZP_Y) {
 
 // Test STX absolute instruction
 TEST(CPU_6502,STX_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STX_ABS;
@@ -147,7 +147,7 @@ TEST(CPU_6502,STX_ABS) {
 
 // Test STY zero page instruction
 TEST(CPU_6502,STY_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STY_ZP;
@@ -159,7 +159,7 @@ TEST(CPU_6502,STY_ZP) {
 
 // Test STY zero page X instruction
 TEST(CPU_6502,STY_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::LDX_IM;
@@ -173,7 +173,7 @@ TEST(CPU_6502,STY_ZP_X) {
 
 // Test STY absolute instruction
 TEST(CPU_6502,STY_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x23;
     cpu.mem[0x1002] = INS::STY_ABS;

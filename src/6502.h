@@ -1,10 +1,69 @@
 #ifndef __6502_H__
 #define __6502_H__
 #include <stdint.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 
 #define MEM_SIZE 0x10000
+
+struct CPU
+{
+    uint8_t mem[MEM_SIZE];
+    uint16_t PC; // program counter
+    uint8_t S; // stack pointer
+
+    int cycles;
+
+    bool exception; // flag only used for unit tests
+
+    // Processor status bits
+    struct {
+        uint8_t N : 1; // negative, bit 7
+        uint8_t V : 1; // overflow, bit 6
+        uint8_t U : 1; // unused, bit 5
+        uint8_t B : 1; // break, bit 4
+        uint8_t D : 1; // deccimal mode, bit 3
+        uint8_t I : 1; // interrupt disable mode, bit 2
+        uint8_t Z : 1; // zero flag, bit 1
+        uint8_t C : 1; // carry flag, bit 0
+    } P;
+
+    uint8_t A; // accumulator
+    uint8_t X; // X register
+    uint8_t Y; // Y register
+
+
+    void branchInstruction( bool takeBranch );
+
+    void setStatusBits( uint8_t byte );
+
+    uint8_t getStatusByte();
+
+    bool loadNESFile( std::string file );
+    void reset();
+    void powerOn( uint16_t PC_Addr = 0x0 );
+
+    // read one byte from mem and increment program counter
+    uint8_t readByte();
+
+    // dump memory at address + 20 bytes
+    void dumpMemory( uint16_t addr, uint8_t length = 40 );
+
+    // dump memory at current PC +- 10 bytes
+    void dumpRegister();
+
+    // dump the stack
+    void dumpStack();
+
+    void A_status_flags();
+    void X_status_flags();
+    void Y_status_flags();
+    void M_status_flags( uint8_t M );
+
+    void execute(int c);
+};
 
 enum INS
 {
@@ -60,8 +119,35 @@ enum INS
     SED_IM = 0xF8,
     SEI_IM = 0x78,
 
-    // NOP
-    NOP_IM = 0xEA,
+    // NOPs
+    NOP_04 = 0x04,
+    NOP_0C = 0x0C,
+    NOP_14 = 0x14,
+    NOP_1A = 0x1A,
+    NOP_1C = 0x1C,
+    NOP_34 = 0x34,
+    NOP_3A = 0x3A,
+    NOP_3C = 0x3C,
+    NOP_44 = 0x44,
+    NOP_54 = 0x54,
+    NOP_5A = 0x5A,
+    NOP_5C = 0x5C,
+    NOP_64 = 0x64,
+    NOP_74 = 0x74,
+    NOP_7A = 0x7A,
+    NOP_7C = 0x7C,
+    NOP_80 = 0x80,
+    NOP_82 = 0x82,
+    NOP_89 = 0x89,
+    NOP_C2 = 0xC2,
+    NOP_D4 = 0xD4,
+    NOP_DA = 0xDA,
+    NOP_DC = 0xDC,
+    NOP_E2 = 0xE2,
+    NOP_EA = 0xEA,
+    NOP_F4 = 0xF4,
+    NOP_FA = 0xFA,
+    NOP_FC = 0xFC,
 
     // Transfer instructions
     TAX_IM = 0xAA,
@@ -155,6 +241,7 @@ enum INS
 
     // Subtract with carry
     SBC_IM = 0xE9,
+    SBC_IM_EB = 0xEB,
     SBC_ZP = 0xE5,
     SBC_ZP_X = 0xF5,
     SBC_ABS = 0xED,
@@ -217,60 +304,4 @@ enum INS
     CPY_ZP = 0xC4,
     CPY_ABS = 0xCC,
 };
-
-struct CPU
-{
-    uint8_t mem[MEM_SIZE];
-    uint16_t PC; // program counter
-    uint8_t S; // stack pointer
-
-    int16_t cycles;
-
-    bool exception; // flag only used for unit tests
-
-    // Processor status bits
-    struct {
-        uint8_t N : 1; // negative, bit 7
-        uint8_t V : 1; // overflow, bit 6
-        uint8_t U : 1; // unused, bit 5
-        uint8_t B : 1; // break, bit 4
-        uint8_t D : 1; // deccimal mode, bit 3
-        uint8_t I : 1; // interrupt disable mode, bit 2
-        uint8_t Z : 1; // zero flag, bit 1
-        uint8_t C : 1; // carry flag, bit 0
-    } P;
-
-    uint8_t A; // accumulator
-    uint8_t X; // X register
-    uint8_t Y; // Y register
-
-
-    void branchInstruction( bool takeBranch );
-
-    void setStatusBits( uint8_t byte );
-
-    uint8_t getStatusByte();
-
-    void reset();
-
-    // read one byte from mem and increment program counter
-    uint8_t readByte();
-
-    // dump memory at address + 20 bytes
-    void dumpMemory( uint16_t addr );
-
-    // dump memory at current PC +- 10 bytes
-    void dumpRegister();
-
-    // dump the stack
-    void dumpStack();
-
-    void A_status_flags();
-    void X_status_flags();
-    void Y_status_flags();
-    void M_status_flags( uint8_t M );
-
-    void execute(int16_t c);
-};
-
 #endif

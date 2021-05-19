@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test PHA implied instruction
 TEST(CPU_6502, PHA_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xFC;
     cpu.mem[0x1002] = INS::PHA_IMP;
@@ -18,7 +18,7 @@ TEST(CPU_6502, PHA_IMP) {
 
 // Test PHP implied instruction
 TEST(CPU_6502, PHP_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.P.C = 1; // bit 0
     cpu.P.Z = 0; // bit 1
     cpu.P.I = 1; // bit 2
@@ -27,15 +27,17 @@ TEST(CPU_6502, PHP_IMP) {
     cpu.P.U = 0; // bit 5
     cpu.P.V = 1; // bit 6
     cpu.P.N = 0; // bit 7
+    // bits 4 and 5 will always be sed when pushed to stack
     cpu.mem[0x1000] = INS::PHP_IMP;
     cpu.execute(3);
-    EXPECT_EQ(cpu.mem[0x100 + cpu.S + 1],0x55);
+    EXPECT_EQ(cpu.mem[0x100 + cpu.S + 1],0x75);
+    cpu.dumpStack();
     checkCyclesAndException();
 }
 
 // Test PLA implied instruction
 TEST(CPU_6502, PLA_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0x13;
     cpu.execute(2);
@@ -55,7 +57,7 @@ TEST(CPU_6502, PLA_IMP) {
 
 // Test PLP implied instruction
 TEST(CPU_6502, PLP_IMP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDA_IM;
     cpu.mem[0x1001] = 0xf;
     cpu.mem[0x1002] = INS::PHA_IMP;

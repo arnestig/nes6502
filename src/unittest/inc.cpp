@@ -7,7 +7,7 @@ extern void checkCyclesAndException();
 
 // Test DEC ZeroPage instruction
 TEST(CPU_6502, DEC_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0x23;
@@ -17,7 +17,7 @@ TEST(CPU_6502, DEC_ZP) {
 }
 // Test DEC ZeroPage instruction, zero flag
 TEST(CPU_6502, DEC_ZP_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0x01;
@@ -28,7 +28,7 @@ TEST(CPU_6502, DEC_ZP_0) {
 }
 // Test DEC ZeroPage instruction, negative flag
 TEST(CPU_6502, DEC_ZP_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0x00;
@@ -39,7 +39,7 @@ TEST(CPU_6502, DEC_ZP_NEGATIVE_FLAG) {
 }
 // Test DEC ZeroPage,X instruction
 TEST(CPU_6502, DEC_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::DEC_ZP_X;
@@ -51,7 +51,7 @@ TEST(CPU_6502, DEC_ZP_X) {
 }
 // Test DEC Absolute instruction
 TEST(CPU_6502, DEC_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEC_ABS;
     cpu.mem[0x1001] = 0x40;
     cpu.mem[0x1002] = 0x20;
@@ -62,7 +62,7 @@ TEST(CPU_6502, DEC_ABS) {
 }
 // Test DEC Absolute,X instruction
 TEST(CPU_6502, DEC_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x0F;
     cpu.mem[0x1002] = INS::DEC_ABS_X;
@@ -75,7 +75,7 @@ TEST(CPU_6502, DEC_ABS_X) {
 }
 // Test DEX immediate instruction
 TEST(CPU_6502, DEX_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEX_IM;
     cpu.mem[0x1001] = INS::DEX_IM;
     cpu.execute(4);
@@ -84,7 +84,7 @@ TEST(CPU_6502, DEX_IM) {
 }
 // Test DEX immediate instruction, X = 0
 TEST(CPU_6502, DEX_IM_X_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x1;
     cpu.mem[0x1002] = INS::DEX_IM;
@@ -95,7 +95,7 @@ TEST(CPU_6502, DEX_IM_X_0) {
 }
 // Test DEX immediate instruction, negative flag
 TEST(CPU_6502, DEX_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEX_IM;
     cpu.mem[0x1001] = INS::DEX_IM;
     cpu.mem[0x1002] = INS::DEX_IM;
@@ -106,7 +106,7 @@ TEST(CPU_6502, DEX_IM_NEGATIVE_FLAG) {
 }
 // Test DEY immediate instruction
 TEST(CPU_6502, DEY_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEY_IM;
     cpu.mem[0x1001] = INS::DEY_IM;
     cpu.execute(4);
@@ -115,7 +115,7 @@ TEST(CPU_6502, DEY_IM) {
 }
 // Test DEY immediate instruction, Y = 0
 TEST(CPU_6502, DEY_IM_Y_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x1;
     cpu.mem[0x1002] = INS::DEY_IM;
@@ -126,7 +126,7 @@ TEST(CPU_6502, DEY_IM_Y_0) {
 }
 // Test DEY immediate instruction, negative flag
 TEST(CPU_6502, DEY_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::DEY_IM;
     cpu.mem[0x1001] = INS::DEY_IM;
     cpu.mem[0x1002] = INS::DEY_IM;
@@ -138,7 +138,7 @@ TEST(CPU_6502, DEY_IM_NEGATIVE_FLAG) {
 
 // Test INC ZeroPage instruction
 TEST(CPU_6502, INC_ZP) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0x23;
@@ -148,7 +148,7 @@ TEST(CPU_6502, INC_ZP) {
 }
 // Test INC ZeroPage instruction, zero flag
 TEST(CPU_6502, INC_ZP_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0xFF;
@@ -159,7 +159,7 @@ TEST(CPU_6502, INC_ZP_0) {
 }
 // Test INC ZeroPage instruction, negative flag
 TEST(CPU_6502, INC_ZP_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INC_ZP;
     cpu.mem[0x1001] = 0xBF;
     cpu.mem[0x00BF] = 0xF0;
@@ -170,7 +170,7 @@ TEST(CPU_6502, INC_ZP_NEGATIVE_FLAG) {
 }
 // Test INC ZeroPage,X instruction
 TEST(CPU_6502, INC_ZP_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xF;
     cpu.mem[0x1002] = INS::INC_ZP_X;
@@ -182,7 +182,7 @@ TEST(CPU_6502, INC_ZP_X) {
 }
 // Test INC Absolute instruction
 TEST(CPU_6502, INC_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INC_ABS;
     cpu.mem[0x1001] = 0x40;
     cpu.mem[0x1002] = 0x20;
@@ -193,7 +193,7 @@ TEST(CPU_6502, INC_ABS) {
 }
 // Test INC Absolute,X instruction
 TEST(CPU_6502, INC_ABS_X) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x0F;
     cpu.mem[0x1002] = INS::INC_ABS_X;
@@ -206,7 +206,7 @@ TEST(CPU_6502, INC_ABS_X) {
 }
 // Test INX immediate instruction
 TEST(CPU_6502, INX_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INX_IM;
     cpu.mem[0x1001] = INS::INX_IM;
     cpu.execute(4);
@@ -215,7 +215,7 @@ TEST(CPU_6502, INX_IM) {
 }
 // Test INX immediate instruction, X = 0
 TEST(CPU_6502, INX_IM_X_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::INX_IM;
@@ -226,7 +226,7 @@ TEST(CPU_6502, INX_IM_X_0) {
 }
 // Test INX immediate instruction, negative flag
 TEST(CPU_6502, INX_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDX_IM;
     cpu.mem[0x1001] = 0x7f;
     cpu.execute(2);
@@ -240,7 +240,7 @@ TEST(CPU_6502, INX_IM_NEGATIVE_FLAG) {
 }
 // Test INY immediate instruction
 TEST(CPU_6502, INY_IM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::INY_IM;
     cpu.mem[0x1001] = INS::INY_IM;
     cpu.execute(4);
@@ -249,7 +249,7 @@ TEST(CPU_6502, INY_IM) {
 }
 // Test INY immediate instruction, Y = 0
 TEST(CPU_6502, INY_IM_Y_0) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0xFF;
     cpu.mem[0x1002] = INS::INY_IM;
@@ -260,7 +260,7 @@ TEST(CPU_6502, INY_IM_Y_0) {
 }
 // Test INY immediate instruction, negative flag
 TEST(CPU_6502, INY_IM_NEGATIVE_FLAG) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::LDY_IM;
     cpu.mem[0x1001] = 0x7f;
     cpu.execute(2);
@@ -275,7 +275,7 @@ TEST(CPU_6502, INY_IM_NEGATIVE_FLAG) {
 
 // Test JMP absolute instruction
 TEST(CPU_6502, JMP_ABS) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::JMP_ABS;
     cpu.mem[0x1001] = 0x08;
     cpu.mem[0x1002] = 0x10;
@@ -287,7 +287,7 @@ TEST(CPU_6502, JMP_ABS) {
 
 // Test INY indirect instruction
 TEST(CPU_6502, JMP_IND) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = INS::JMP_IND;
     cpu.mem[0x1001] = 0x08;
     cpu.mem[0x1002] = 0x10;

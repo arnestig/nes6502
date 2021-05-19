@@ -1,43 +1,8 @@
 #include "6502.h"
 #include "gtest/gtest.h"
-#include <fstream>
 #include <string.h>
 
 struct CPU cpu;
-
-void loadNESFile()
-{
-    std::ifstream ifs("nestest.nes", std::ios_base::in | std::ios_base::binary);
-    if ( ifs ) {
-        uint8_t header[16];
-        if (!ifs.read(reinterpret_cast<char*>(&header[0]),0x10)) {
-            printf("Error reading NES file\n");
-            exit(1);
-        }
-        uint8_t prgbanks = header[4];
-        uint8_t chrbanks = header[5];
-        uint8_t mapper = ((header[6] >> 4) & 0xF) | (header[7] & 0xF0);
-        if ( mapper != 0 ) {
-            printf("Mapper %d not supported\n",mapper);
-            exit(1);
-        }
-        int prgsize = 1024*16*prgbanks;
-        int chrsize = 1024*8*chrbanks;
-        uint8_t prgrom[prgsize];
-        uint8_t chrrom[chrsize];
-        if (!ifs.read(reinterpret_cast<char*>(&prgrom[0]),prgsize)) {
-            printf("Error reading NES file\n");
-            exit(1);
-        }
-        if ( prgbanks == 1 ) {
-            memcpy(&cpu.mem[0x8000],&prgrom[0],prgsize);
-            memcpy(&cpu.mem[0xC000],&prgrom[0],prgsize);
-        } else if ( prgbanks == 2 ) {
-            memcpy(&cpu.mem[0x8000],&prgrom[0],prgsize);
-        }
-
-    }
-}
 
 void checkCyclesAndException()
 {
@@ -54,7 +19,7 @@ TEST(CPU_6502, RAW_PROGRAM_1) {
     // $0607    8d 01 02  STA $0201
     // $060a    a9 08     LDA #$08
     // $060c    8d 02 02  STA $0202
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = 0xa9;
     cpu.mem[0x1001] = 0x01;
     cpu.mem[0x1002] = 0x8d;
@@ -81,8 +46,8 @@ TEST(CPU_6502, RAW_PROGRAM_1) {
 
 // Test NOP instruction
 TEST(CPU_6502, NOP) {
-    cpu.reset();
-    cpu.mem[0x1000] = INS::NOP_IM;
+    cpu.powerOn( 0x1000 );
+    cpu.mem[0x1000] = INS::NOP_EA;
     cpu.execute(2);
     checkCyclesAndException();
 }
@@ -91,7 +56,7 @@ TEST(CPU_6502, NOP) {
 // 0600: a2 08 ca 8e 00 02 e0 03 d0 f8 8e 01 02 00
 // Load X to 8, decrease X, compare X with 3, jump back to decrease if not equal
 TEST(CPU_6502, BNE_PROGRAM) {
-    cpu.reset();
+    cpu.powerOn( 0x1000 );
     cpu.mem[0x1000] = 0xA2;
     cpu.mem[0x1001] = 0x08;
     cpu.mem[0x1002] = 0xCA;
@@ -110,15 +75,486 @@ TEST(CPU_6502, BNE_PROGRAM) {
     EXPECT_EQ(cpu.X,0x3);
 }
 
+// Run Blargg CPU_reset/registers.nes test rom
+TEST(CPU_6502, BLARGG_registers) {
+    cpu.loadNESFile( "test-roms/blargg/cpu_reset/registers.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg CPU_reset/ram_after_reset.nes test rom
+TEST(CPU_6502, BLARGG_ram_after_reset) {
+    cpu.loadNESFile( "test-roms/blargg/cpu_reset/ram_after_reset.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run nestest.nes test rom
+// TEST(CPU_6502, NESTEST_ROM) {
+//     cpu.loadNESFile( "test-roms/nestest/nestest.nes" );
+//     cpu.powerOn( 0xC000 );
+//     printf("Will start with PC: %x\n",cpu.PC);
+//     bool done = false;
+//     while ( done == false ) {
+//         cpu.execute(100000);
+        // if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+        //     if ( cpu.mem[0x6000] == 0x81 ) {
+        //         cpu.reset();
+        //     }
+        //     if ( cpu.mem[0x6000] < 0x80 ) {
+        //         done = true;
+        //     }
+        // }
+    //     done = true;
+    //     cpu.dumpMemory(0x0000);
+    // }
+    // cpu.dumpMemory(0x6000);
+    // EXPECT_EQ(cpu.mem[0x6000], 0x0);
+// }
+
+TEST(CPU_6502, TEST_STATUS_BITS) {
+    cpu.powerOn( 0x1000 );
+    cpu.P = {0};
+    cpu.P.C = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x1);
+    cpu.P = {0};
+    cpu.P.Z = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x2);
+    cpu.P = {0};
+    cpu.P.I = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x4);
+    cpu.P = {0};
+    cpu.P.D = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x8);
+    cpu.P = {0};
+    cpu.P.B = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x10);
+    cpu.P = {0};
+    cpu.P.U = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x20);
+    cpu.P = {0};
+    cpu.P.V = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x40);
+    cpu.P = {0};
+    cpu.P.N = 1;
+    EXPECT_EQ(cpu.getStatusByte(), 0x80);
+    cpu.P = {1,1,1,1,1,1,1,1};
+    EXPECT_EQ(cpu.getStatusByte(), 0xFF);
+    checkCyclesAndException();
+}
+
+// Run Blargg cpu/01-basics.nes test rom
+TEST(CPU_6502, BLARGG_01_BASICS_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/01-basics.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/02-implied.nes test rom
+TEST(CPU_6502, BLARGG_02_IMPLIED_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/02-implied.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/03-immediate.nes test rom
+TEST(CPU_6502, BLARGG_03_IMMEDIATE_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/03-immediate.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0xFF);
+    }
+}
+
+// Run Blargg cpu/04-zero_page.nes test rom
+TEST(CPU_6502, BLARGG_04_ZERO_PAGE_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/04-zero_page.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/05-zp_xy.nes test rom
+TEST(CPU_6502, BLARGG_05_ZP_XY_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/05-zp_xy.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/06-absolute.nes test rom
+TEST(CPU_6502, BLARGG_06_ABSOLUTE_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/06-absolute.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/07-abs_xy.nes test rom
+TEST(CPU_6502, BLARGG_07_ABS_XY_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/07-abs_xy.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/08-ind_x.nes test rom
+TEST(CPU_6502, BLARGG_08_IND_X_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/08-ind_x.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/09-ind_y.nes test rom
+TEST(CPU_6502, BLARGG_09_IND_Y_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/09-ind_y.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/10-branches.nes test rom
+TEST(CPU_6502, BLARGG_10_BRANCHES_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/10-branches.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/11-stack.nes test rom
+TEST(CPU_6502, BLARGG_11_STACK_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/11-stack.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/12-jmp_jsr.nes test rom
+TEST(CPU_6502, BLARGG_12_JMP_JSR_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/12-jmp_jsr.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/13-rts.nes test rom
+TEST(CPU_6502, BLARGG_13_RTS_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/13-rts.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/14-rti.nes test rom
+TEST(CPU_6502, BLARGG_14_RTI_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/14-rti.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/15-brk.nes test rom
+TEST(CPU_6502, BLARGG_15_BRK_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/15-brk.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+
+
+// Run Blargg cpu/16-special.nes test rom
+TEST(CPU_6502, BLARGG_16_SPECIAL_NES) {
+    cpu.loadNESFile( "test-roms/blargg/cpu/16-special.nes" );
+    cpu.powerOn();
+    bool done = false;
+    while ( done == false && cpu.exception == false ) {
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
+// Run Blargg cpu/official_only.nes test rom
+TEST(CPU_6502, BLARGG_OFFICIAL_ONLY_NES) {
+    if ( cpu.loadNESFile( "test-roms/blargg/cpu/official_only.nes" ) == false ) {
+        FAIL();
+    }
+    cpu.powerOn();
+    bool done = false;
+    printf("...\n");
+    while ( done == false && cpu.exception == false ) {
+        printf("...\n");
+        cpu.execute(4000000);
+        if ( cpu.mem[0x6001] == 0xDE && cpu.mem[0x6002] == 0xB0 && cpu.mem[0x6003] == 0x61 ) {
+            if ( cpu.mem[0x6000] == 0x81 ) {
+                cpu.reset();
+            }
+            if ( cpu.mem[0x6000] < 0x80 ) {
+                done = true;
+            }
+        }
+    }
+    EXPECT_EQ(cpu.mem[0x6000], 0x0);
+    if ( cpu.mem[0x6000] != 0x0 && cpu.exception == false ) {
+        cpu.dumpMemory(0x6000, 0x40);
+    }
+}
+
 int main( int argc, char* argv[])
 {
-    // cpu.reset();
-    // loadNESFile();
-    // cpu.PC = ( cpu.mem[0xFFFC] | (cpu.mem[0xFFFD] << 8));
-    // cpu.execute(4000);
-    // printf("status: %x\n",cpu.mem[0x6000]);
-    // printf("executions: %d\n",cpu.cycles);
-    // cpu.dumpMemory(0x6000);
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
